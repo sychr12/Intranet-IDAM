@@ -12,11 +12,9 @@ import { motion, Variants } from "framer-motion";
 // Importa 'motion' para componentes animados e 'Variants' para tipar variantes de animação.
 
 import {
-  Menu,
   Building2,
   Users2,
   FileText,
-  UserCircle,
   Gavel,
   Newspaper,
   Scale,
@@ -28,9 +26,11 @@ import {
   File,
 } from "lucide-react";
 // Importa vários ícones SVG da biblioteca 'lucide-react' usados na interface.
+// Obs: "Menu" e "UserCircle" foram removidos pois não eram utilizados em nenhum lugar do componente.
 
-import { Layers, BarChart3, Mail, Globe, Wrench, Leaf } from "lucide-react";
+import { Layers, BarChart3, Mail, Globe, Wrench } from "lucide-react";
 // Importa ícones adicionais da mesma biblioteca.
+// Obs: "Leaf" foi removido pois não era utilizado.
 
 // =====================
 // COMPONENTES DE INTERFACE
@@ -39,14 +39,8 @@ import { Layers, BarChart3, Mail, Globe, Wrench, Leaf } from "lucide-react";
 import Calendar from "react-calendar";
 // Importa componente de calendário da biblioteca 'react-calendar'.
 
-import "react-calendar/dist/Calendar.css";
-// Importa o CSS padrão do calendário para estilo básico.
-
 import Image from "next/image";
 // Importa o componente de imagem otimizado do Next.js.
-
-import "../app/calendar.css";
-// Importa um CSS personalizado (local) para ajustar estilos do calendário.
 
 import Link from "next/link";
 // Importa o componente Link do Next.js para navegação interna sem reload completo.
@@ -63,26 +57,6 @@ type Value = ValuePiece | [ValuePiece, ValuePiece];
 
 type DepartmentKey = "PJ" | "RH" | "SGC";
 // Restrição de chaves válidas para abas/departamentos: somente "PJ", "RH" ou "SGC".
-
-// Tipagem dos colaboradores da empresa
-type Colaborador = {
-  id: number; // ID interno do colaborador
-  nome: string; // Nome do colaborador
-  cargo: string; // Cargo ou função
-  foto: string; // URL da foto do colaborador
-  data_nascimento: string; // Data de nascimento como string
-};
-
-// Tipagem genérica para registros como contatos, emails, ramais etc.
-type Registro = {
-  id: number; // ID do registro
-  nome?: string; // Nome (opcional)
-  cargo?: string; // Cargo (opcional)
-  ramal?: string; // Ramal (opcional)
-  email?: string; // Email (opcional)
-  contato?: string; // Telefone/contato (opcional)
-  foto?: string; // Foto (opcional)
-};
 
 // Tipagem da estrutura de notícias exibidas no card de dicas
 interface NewsItem {
@@ -123,7 +97,7 @@ const quickLinks = [
     href: "https://www.e-compras.am.gov.br/publico/",
   },
   {
-    title: "Email ",
+    title: "Email",
     icon: <Mail className="w-6 h-6" />,
     href: "https://portal.office.com",
   },
@@ -137,11 +111,7 @@ const quickLinks = [
     icon: <FolderOpen className="w-6 h-6" />,
     href: "https://sistemas.sefaz.am.gov.br/siged/login",
   },
-  {
-    title: "Sigatex",
-    icon: <Leaf className="w-6 h-6" />,
-    href: "https://sigater.idam.am.gov.br/",
-  },
+
   {
     title: "Site IDAM",
     icon: <Globe className="w-6 h-6" />,
@@ -350,50 +320,28 @@ export default function Page() {
       {
         id: 1,
         title: "O que é malware e como se proteger?",
-        img: "./image/virus.png",
+        img: "/image/virus.png",
         href: "https://www.kaspersky.com.br/resource-center/preemptive-safety/what-is-malware-and-how-to-protect-against-it",
       },
       {
         id: 2,
         title: "Por que você não deve compartilhar suas senhas?",
-        img: "./image/compartilharsenha.png",
+        img: "/image/compartilharsenha.png",
         href: "https://digitalsecurityguide.eset.com/br/por-que-voce-nao-deve-compartilhar-suas-senhas",
       },
       {
         id: 3,
         title: "Como Fazer um Chamado",
-        img: "./image/img1.png",
+        img: "/image/img1.png",
         href: "https://office365prodam-my.sharepoint.com/:b:/g/personal/nti_idam_am_gov_br/EedyNcwHiHFIvvURrOX9Z-oBVP-bAnKVXMgpW1AndAFW6Q?e=RNoSew",
       },
     ];
+    // Obs: os caminhos das imagens foram corrigidos de "./image/..." para "/image/...".
+    // Caminhos relativos com "./" resolvem em relação à URL da rota atual, o que quebra
+    // a imagem em qualquer rota que não seja a raiz. Caminhos a partir de "/" sempre
+    // apontam para a pasta "public" do Next.js, independente da rota.
     setFetchedNews(mockNews);
     // Atualiza o estado 'fetchedNews' com os dados mockados.
-  }, []);
-  // useEffect sem dependências => roda apenas uma vez ao montar o componente.
-
-  // Estado que mostra o que está tocando no momento
-  const [nowPlaying, setNowPlaying] = useState("Carregando...");
-
-  // Estado que controla se está tocando ou pausado
-  const [isPlaying, setIsPlaying] = useState(false);
-
-  // Busca "tocando agora" da BRLogic quando o player carrega
-  useEffect(() => {
-    fetch("https://api.brlogic.com/nowplaying/7486")
-      .then((r) => r.json())
-      .then((d) => {
-        // Nome da rádio
-        const radioName = d.station?.name || "Rádio";
-
-        // Música atual
-        const music = d.title || "Informação indisponível";
-
-        // Exibe no player
-        setNowPlaying(`${radioName} — Tocando: ${music}`);
-      })
-      .catch(() => {
-        setNowPlaying("Informação indisponível");
-      });
   }, []);
 
   // ============================
@@ -409,7 +357,7 @@ export default function Page() {
       // Começa o loading para indicar que está buscando a hora
 
       try {
-        // 📡 Nova API estável usada: WorldTimeAPI
+        // 📡 WorldTimeAPI
         const res = await fetch(
           "https://worldtimeapi.org/api/timezone/America/Manaus"
         );
@@ -432,7 +380,9 @@ export default function Page() {
           console.warn("⚠️ Data inválida recebida:", data);
         }
       } catch (err) {
-        // Qualquer erro vem parar aqui
+        // Qualquer erro vem parar aqui. Como 'date' já foi inicializado com a data
+        // local da máquina (new Date()), a interface continua funcional mesmo
+        // se essa chamada externa falhar ou estiver indisponível.
         console.error("❌ Erro ao buscar hora do servidor:", err);
       } finally {
         // Finaliza o loading de forma segura
@@ -446,12 +396,12 @@ export default function Page() {
   // Dependências vazias => executa apenas uma vez ao montar.
 
   return (
-    <div className="relative w-full min-h-screen bg-[url('/Gov/foto7.png')] bg-cover bg-center bg-no-repeat">
-      {/* Container principal: fundo com imagem, ocupa toda a altura mínima da tela */}
+    <div className="relative w-full min-h-screen bg-[#f5f5f5]">
+      {/* Container principal: fundo com cor clara, ocupa toda a altura mínima da tela */}
 
       {/* ====== CABEÇALHO ====== */}
       <motion.header
-        className=" border-b border-gray-100 bg-[#227e6a] shadow-sm sticky top-0 z-50"
+        className="border-b border-gray-100 bg-[#227e6a] shadow-sm sticky top-0 z-50"
         initial={{ y: -30, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
       >
@@ -463,13 +413,13 @@ export default function Page() {
               src="/Gov/logo-idam.png"
               alt="Logo IDAM"
               width={64}
-              height={64} //
+              height={64}
               className="object-contain"
             />
             {/* Logo usando Next/Image com largura/altura definidas */}
 
             <div>
-              <h1 className="text-[1.10rem] leading-nonebg-[url('/Gov/foto7.png')] tracking-tight sm:text-[1.0rem] font-geomanist font-semibold text-white">
+              <h1 className="text-[1.10rem] leading-none tracking-tight sm:text-[1.0rem] font-geomanist font-semibold text-white">
                 INTRANET
               </h1>
               {/* Título principal do cabeçalho */}
@@ -482,7 +432,7 @@ export default function Page() {
             </div>
           </div>
 
-          <Link href="./login">
+          <Link href="/login">
             <motion.button
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.95 }}
@@ -493,10 +443,9 @@ export default function Page() {
       </motion.header>
 
       {/* ====== HERO ====== */}
-      <section className=" py-12 text-center border-b bg-[#144b3f] border-gray-200">
+      <section className="py-12 text-center border-b bg-[#144b3f] border-gray-200">
         {/* Seção principal (hero) com cor de fundo escura */}
-        {/* Logo à direita */}
-        <div className="flex justify-center-safe">
+        <div className="flex justify-center">
           <Image
             src="/Gov/Nome-INTRANET.png"
             alt="Logo IDAM"
@@ -510,8 +459,8 @@ export default function Page() {
       </section>
 
       {/* Lista de links rápidos (Quick Links) */}
-      <div className="max-w-7xl mx-auto px-6 -mt-0 font-geomanist font-normal hover:shadow-black ">
-        <div className="grid grid-cols-2 md:grid-cols-8 gap-4 p-5 hover:ring-black font-geomanist font-normal hover:[] ">
+      <div className="max-w-7xl mx-auto px-6 md:pl-40 -mt-1 font-geomanist font-normal">
+        <div className="grid grid-cols-2 md:grid-cols-8 gap-4 p-5 font-geomanist font-normal">
           {quickLinks.map((q, i) => (
             <motion.a
               key={q.title}
@@ -524,7 +473,7 @@ export default function Page() {
               href={q.href}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex flex-col items-center justify-center gap-2 p-3 hover:shadow-black bg-[#144b3f] text-white rounded-xl shadow-md hover:bg-[#1d6654] transition-all duration-300 min-h-[110px]"
+              className="flex flex-col items-center justify-center gap-2 p-3 bg-[#144b3f] text-white rounded-xl shadow-md hover:bg-[#1d6654] transition-all duration-300 min-h-[110px]"
             >
               {/* Cada atalho rápido é um link externo com animação */}
               {/* Ícone */}
@@ -543,97 +492,6 @@ export default function Page() {
         </div>
       </div>
 
-      {/* CONTAINER CENTRALIZADO COMO O TÍTULO DOCUMENTOS */}
-      <div className="w-full flex flex-col items-center mt-6">
-        {/* TÍTULO DO PLAYER CENTRALIZADO */}
-        <p className="text-[#1b3631] font-semibold mb-1 text-sm text-center w-full">
-          Ouça a Rádio Agência Amazonas
-        </p>
-
-        {/* PLAYER CENTRALIZADO IGUAL AO TÍTULO DOCUMENTOS */}
-        <div
-          className="bg-white border border-[#d9e6df] rounded-lg flex items-center gap-3 
-               p-3 shadow-sm w-full max-w-[600px]"
-        >
-          {/* BOTÃO PLAY/PAUSE */}
-          <button
-            onClick={() => {
-              const audio = document.getElementById(
-                "player"
-              ) as HTMLAudioElement;
-
-              // Alterna play/pause
-              if (audio.paused) {
-                audio.play();
-                setIsPlaying(true);
-              } else {
-                audio.pause();
-                setIsPlaying(false);
-              }
-            }}
-            className="w-9 h-9 flex items-center justify-center bg-[#276f59] hover:bg-[#1d5947] 
-                 text-white rounded-full shadow-sm transition-all duration-200"
-          >
-            {/* ÍCONES */}
-            {isPlaying ? (
-              // Ícone de pause
-              <svg width="12" height="12" fill="white">
-                <rect x="3" y="1" width="3" height="10" rx="1" />
-                <rect x="7" y="1" width="3" height="10" rx="1" />
-              </svg>
-            ) : (
-              // Ícone de play
-              <svg width="12" height="12" fill="white">
-                <polygon points="3,1 11,6 3,11" />
-              </svg>
-            )}
-          </button>
-
-          {/* BARRA + TEXTO */}
-          <div className="flex items-center gap-3 flex-1">
-            <input
-              id="progress"
-              type="range"
-              min="0"
-              max="100"
-              defaultValue="0"
-              className="w-full accent-[#276f59] cursor-pointer h-1.5 rounded-lg"
-              onChange={(e) => {
-                const audio = document.getElementById(
-                  "player"
-                ) as HTMLAudioElement;
-
-                // Permite buscar manualmente com a barra
-                if (audio.duration) {
-                  audio.currentTime =
-                    (audio.duration * Number(e.target.value)) / 100;
-                }
-              }}
-            />
-
-            {/* TEXTO TOCANDO AGORA VINDO DA API */}
-            <span className="text-[#1b3631] text-[11px] whitespace-nowrap opacity-80">
-              {nowPlaying}
-            </span>
-          </div>
-        </div>
-
-        {/* ÁUDIO */}
-        <audio
-          id="player"
-          src="https://servidor29-2.brlogic.com:7486/live"
-          onTimeUpdate={() => {
-            const audio = document.getElementById("player") as HTMLAudioElement;
-            const bar = document.getElementById("progress") as HTMLInputElement;
-
-            // Atualiza a barra conforme o áudio toca
-            if (audio.duration) {
-              bar.value = String((audio.currentTime / audio.duration) * 100);
-            }
-          }}
-        />
-      </div>
-
       {/* ====== CONTEÚDO PRINCIPAL ====== */}
       <motion.main
         className="max-w-7xl mx-auto px-6 py-10 grid grid-cols-1 lg:grid-cols-3 gap-8"
@@ -649,10 +507,10 @@ export default function Page() {
           {/* Documentos */}
 
           <motion.section variants={fadeUp}>
-            <h3 className="text-xl font-semibold text-[#144b3f] mb-3 text-bold">
+            <h3 className="text-xl font-semibold text-[#144b3f] mb-3 font-bold">
               Documentos
             </h3>
-            <div className="flex flex-wrap gap-4 bg-amber-10 font-geomanist font-normal">
+            <div className="flex flex-wrap gap-4 font-geomanist font-normal">
               {officeApps.map((doc) => (
                 <motion.a
                   key={doc.title}
@@ -676,9 +534,9 @@ export default function Page() {
             variants={fadeUp}
             initial="hidden"
             animate="visible"
-            className="font-geomanist font-normal "
+            className="font-geomanist font-normal"
           >
-            <h3 className="text-xl font-semibold text-[#144b3f] mb-3 text-bold">
+            <h3 className="text-xl font-semibold text-[#144b3f] mb-3 font-bold">
               Departamentos
             </h3>
 
@@ -718,7 +576,7 @@ export default function Page() {
                   href={item.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-3 p-3 bg-white  rounded-lg shadow-sm hover:shadow-md transition"
+                  className="flex items-center gap-3 p-3 bg-white rounded-lg shadow-sm hover:shadow-md transition"
                 >
                   <span className="text-[#144b3f]">{item.icon}</span>
                   <span className="text-base">{item.title}</span>
@@ -728,68 +586,46 @@ export default function Page() {
             </div>
           </motion.section>
 
-          {/* Dicas (Notícias) */}
-          <motion.section
-            variants={fadeUp}
-            initial="hidden"
-            animate="visible"
-            className="font-geomanist font-normal"
-          >
-            <h3 className="text-xl font-semibold text-[#144b3f] mb-3">Dicas</h3>
+      {/* Dicas (Notícias) */}
+      <section className="font-geomanist font-normal bg-[#f5f5f5] rounded-3xl p-5">
+        <h3 className="text-xl font-semibold text-[#144b3f] mb-3">Dicas</h3>
 
-            {fetchedNews.length > 0 ? (
-              <motion.div
-                className="grid grid-cols-1 md:grid-cols-3 gap-4"
-                variants={{
-                  visible: { transition: { staggerChildren: 0.15 } },
+        {fetchedNews.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {fetchedNews.map((item) => (
+              <motion.a
+                key={item.id}
+                whileHover={{
+                  scale: 1.05,
+                  boxShadow: "0px 6px 18px rgba(0, 0, 0, 0.164)",
                 }}
-                initial=""
-                animate="visible"
+                whileTap={{ scale: 0.97 }}
+                href={item.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group block bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden transition duration-300"
               >
-                {fetchedNews.map((item, i) => (
-                  <motion.a
-                    key={item.id}
-                    custom={i}
-                    variants={fadeUp}
-                    whileHover={{
-                      scale: 1.05,
-                      boxShadow: "0px 6px 15px rgba(0,0,0,0.1)",
-                    }}
-                    whileTap={{ scale: 0.97 }}
-                    href={item.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="block bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden transition"
-                  >
-                    <motion.img
-                      src={item.img}
-                      alt={item.title}
-                      className="w-full h-32 object-cover"
-                      whileHover={{ scale: 1.08 }}
-                      transition={{ duration: 0.3 }}
-                    />
-                    {/* Imagem da notícia com leve zoom ao hover */}
-                    <div className="p-3">
-                      <p className="text-base font-semibold text-gray-800 leading-tight group-hover:text-[#144b3f] transition-colors">
-                        {item.title}
-                        {/* Título da dica/notícia */}
-                      </p>
-                    </div>
-                  </motion.a>
-                ))}
-              </motion.div>
-            ) : (
-              <motion.div
-                variants={fadeUp}
-                initial=""
-                animate="visible"
-                className="text-base text-slate-500 pt-2 text-center bg-white p-4 rounded-lg shadow-sm border border-gray-100"
-              >
-                Nenhuma dica disponível no momento.
-                {/* Mensagem exibida quando não há notícias */}
-              </motion.div>
-            )}
-          </motion.section>
+                <motion.img
+                  src={item.img}
+                  alt={item.title}
+                  className="w-full h-32 object-cover"
+                  whileHover={{ scale: 1.08 }}
+                  transition={{ duration: 0.3 }}
+                />
+                <div className="p-3">
+                  <p className="text-base font-semibold text-gray-800 leading-tight group-hover:text-[#144b3f] transition-colors">
+                    {item.title}
+                  </p>
+                </div>
+              </motion.a>
+            ))}
+          </div>
+        ) : (
+          <div className="text-base text-slate-500 pt-2 text-center bg-[#f5f5f5] p-4 rounded-lg shadow-sm border border-gray-100">
+            Nenhuma dica disponível no momento.
+          </div>
+        )}
+      </section>
         </div>
 
         {/* COLUNA DIREITA */}
@@ -844,7 +680,7 @@ export default function Page() {
               target="_blank"
               rel="noopener noreferrer"
               whileHover={{ scale: 1.02, x: 2 }}
-              className="flex itens-center justify-center gap-3 p-4 mt-2 bg-[#144b3f] text-white rounded-lg font-medium hover:bg-[#227e6a] transition duration-200 shadow-md"
+              className="flex items-center justify-center gap-3 p-4 mt-2 bg-[#144b3f] text-white rounded-lg font-medium hover:bg-[#227e6a] transition duration-200 shadow-md"
             >
               <File className="w-5 h-5" />
               Visualizar Lista de Emails (PDF)
@@ -886,8 +722,8 @@ export default function Page() {
       <footer className="bg-[#144b3f] text-white font-geomanist font-normal h-30">
         <div className="max-w-7xl mx-auto px-6 py-1 flex flex-col md:flex-row items-center justify-between gap-6">
           {/* Conteúdo do rodapé: texto institucional e logos */}
-          <div className="flex flex-col text-center md:text-left ">
-            <p className="text-base leading-relaxed ">
+          <div className="flex flex-col text-center md:text-left">
+            <p className="text-base leading-relaxed">
               NÚCLEO DE TECNOLOGIA DA INFORMAÇÃO
             </p>
             <p className="text-xs text-gray-200 mt-2">
