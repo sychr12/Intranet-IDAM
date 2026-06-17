@@ -1,105 +1,148 @@
-# 📘 Guia Completo da Intranet IDAM
+# 📘 Intranet IDAM
 
-## 🚀 Como rodar o projeto (NPM)
+Sistema interno desenvolvido para centralizar o acesso aos principais serviços, documentos, sistemas corporativos e informações institucionais do IDAM.
 
-### 📦 Instalar dependências
+---
+
+# 🚀 Como Executar o Projeto
+
+## 📦 Instalar Dependências
+
 ```bash
 npm install
 ```
 
-### ▶️ Rodar em ambiente de desenvolvimento
+## ▶️ Executar em Ambiente de Desenvolvimento
+
 ```bash
 npm run dev
 ```
 
-### 🏗️ Gerar build de produção
+## 🏗️ Gerar Build de Produção
+
 ```bash
 npm run build
 ```
 
-### 🔥 Iniciar o servidor em produção
+## 🔥 Iniciar em Produção
+
 ```bash
 npm start
 ```
 
-### 🧹 Opcional: limpar cache do Next
+## 🧹 Limpar Cache do Next.js (Opcional)
+
 ```bash
 npm run clean
 ```
 
 ---
 
-## 🏠 Tela Inicial – Acesso aos Serviços
+# 🏠 Tela Inicial – Acesso aos Serviços
 
-A tela inicial oferece acesso rápido aos principais sistemas utilizados pelos servidores do IDAM.  
-Cada botão funciona como um atalho direto para o serviço correspondente.
+A página inicial oferece acesso rápido aos principais sistemas utilizados pelos colaboradores do IDAM. Cada botão funciona como um atalho direto para o respectivo serviço.
 
-**Serviços disponíveis:**
-- AJURI
-- E-Compras
-- SEFAZ
-- SIGED
-- SIGATEX
-- Site IDAM
-- Suporte de TI
+## Serviços Disponíveis
 
-## 📻 Rádio Agência Amazonas
+* AJURI
+* E-Compras
+* SEFAZ
+* SIGED
+* Site IDAM
+* Suporte de TI
 
-A Intranet conta com um player integrado da **Rádio Agência Amazonas**, permitindo:
-- Ouvir a programação ao vivo
-- Pausar e retomar a transmissão
-- Ver o programa atual
+---
 
-## 📄 Documentos – Aplicativos Office 365
+# 📄 Documentos – Aplicativos Microsoft 365
 
-A seção **Documentos** reúne os principais aplicativos corporativos em nuvem, permitindo acesso rápido às ferramentas do Office 365:
+A seção **Documentos** disponibiliza acesso rápido aos principais aplicativos corporativos da plataforma Microsoft 365:
 
-- Outlook
-- Word
-- Excel
-- PowerPoint
-- OneDrive
-- Teams
-- Forms
-- Portal Office
+* Outlook
+* Word
+* Excel
+* PowerPoint
+* OneDrive
+* Teams
+* Forms
+* Portal Microsoft 365
 
-## 🏢 Departamentos – Serviços Jurídicos e Administrativos
+---
 
-Área destinada aos sistemas utilizados por PJ, RH e SGC.
+# 🏢 Departamentos – Sistemas Jurídicos e Administrativos
 
-**Principais sistemas disponíveis:**
-- Diário Oficial
-- DOE TCE
-- DEJT
-- Comunica PJE
-- e-SAJ
-- PROJUDI
+Área destinada ao acesso dos sistemas utilizados pelos setores Jurídico (PJ), Recursos Humanos (RH) e Secretaria Geral de Controle (SGC).
 
-## 🔐 Dicas de Segurança da Informação
+## Sistemas Disponíveis
 
-Cartões com orientações importantes:
-- Evitar malware  
-- Cuidados ao compartilhar dados  
-- Políticas recomendadas de senha  
-- Como abrir chamados no suporte de TI  
+* Diário Oficial
+* DOE TCE
+* DEJT
+* Comunica PJe
+* e-SAJ
+* PROJUDI
 
-## 📅 Calendário Institucional
+---
 
-Exibe feriados, eventos internos, prazos e datas importantes.
+# 🔐 Dicas de Segurança da Informação
 
-## ☎️ Listas de Contatos, Emails e Ramais
+Seção com orientações e boas práticas para utilização segura dos recursos tecnológicos da instituição.
 
-Links para PDFs com:
-- Ramais atualizados  
-- Emails institucionais  
-- Contatos internos  
+## Principais Recomendações
 
-## 📚 Sumário Geral
+* Prevenção contra malware;
+* Cuidados ao compartilhar informações;
+* Boas práticas para criação de senhas;
+* Procedimentos para abertura de chamados junto ao suporte de TI.
 
-- Tela Inicial – Acesso aos Serviços  
-- Rádio Agência Amazonas  
-- Documentos – Aplicativos Office 365  
-- Departamentos – Serviços Jurídicos e Administrativos  
-- Dicas de Segurança da Informação  
-- Calendário Institucional  
-- Listas de Contatos, Emails e Ramais  
+---
+
+# 📅 Calendário Institucional
+
+Disponibiliza informações sobre:
+
+* Feriados;
+* Eventos internos;
+* Prazos institucionais;
+* Datas importantes da organização.
+
+---
+
+# ☎️ Contatos, E-mails e Ramais
+
+Acesso rápido a documentos contendo:
+
+* Lista de ramais atualizada;
+* E-mails institucionais;
+* Contatos internos dos setores.
+
+---
+
+# 📚 Funcionalidades Disponíveis
+
+* Tela Inicial – Acesso aos Serviços
+* Aplicativos Microsoft 365
+* Sistemas Jurídicos e Administrativos
+* Dicas de Segurança da Informação
+* Calendário Institucional
+* Contatos, E-mails e Ramais
+
+---
+
+# 🆕 Atualizações Recentes
+
+## Adicionado
+
+* Página **Criadores**, com informações detalhadas da equipe responsável pelo projeto.
+* Animações e melhorias visuais na página de criadores.
+* Declarações globais de tipos para módulos CSS e SCSS.
+
+## Alterado
+
+* Atualização da dependência `react-calendar` da versão `6.0.0` para `6.0.1`.
+* Inclusão da opção `ignoreDeprecations` no arquivo `tsconfig.json`.
+* Melhorias gerais na documentação do projeto.
+
+## Removido
+
+* Arquivo `docker-compose.yml`.
+* Integração da Rádio Agência Amazonas.
