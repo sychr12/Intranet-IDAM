@@ -20,23 +20,36 @@ public class CustomUserDetailsService implements UserDetailsService {
     @Override
     @Transactional(readOnly = true)
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        log.debug("Carregando usuário por username: {}", username);
+        log.debug("Carregando usuario por username: {}", username);
 
-        return userRepository.findByUsername(username)
+        User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> {
-                    log.error("Usuário não encontrado com username: {}", username);
-                    return new UsernameNotFoundException("Usuário não encontrado: " + username);
+                    log.error("Usuario nao encontrado com username: {}", username);
+                    return new UsernameNotFoundException("Usuario nao encontrado: " + username);
                 });
+
+        return toUserDetails(user);
     }
 
     @Transactional(readOnly = true)
     public UserDetails loadUserById(String id) {
-        log.debug("Carregando usuário por ID: {}", id);
+        log.debug("Carregando usuario por ID: {}", id);
 
-        return userRepository.findById(id)
+        User user = userRepository.findById(Long.valueOf(id))
                 .orElseThrow(() -> {
-                    log.error("Usuário não encontrado com ID: {}", id);
-                    return new UsernameNotFoundException("Usuário não encontrado com ID: " + id);
+                    log.error("Usuario nao encontrado com ID: {}", id);
+                    return new UsernameNotFoundException("Usuario nao encontrado com ID: " + id);
                 });
+
+        return toUserDetails(user);
+    }
+
+    private UserDetails toUserDetails(User user) {
+        return org.springframework.security.core.userdetails.User.builder()
+                .username(user.getUsername())
+                .password(user.getPassword())
+                .roles(user.getRole().name())
+                .disabled(!Boolean.TRUE.equals(user.getAtivo()))
+                .build();
     }
 }

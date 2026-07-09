@@ -34,6 +34,7 @@ public class User {
     private String fullName;
 
     @Column(name = "is_active")
+    @Builder.Default
     private Boolean isActive = true;
 
     @Column(name = "created_at")
@@ -51,5 +52,21 @@ public class User {
     @PreUpdate
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
+    }
+
+    public String getNome() {
+        return fullName;
+    }
+
+    public String getEmail() {
+        return username;
+    }
+
+    public String getFoto() {
+        return null;
+    }
+
+    public Boolean getAtivo() {
+        return isActive;
     }
 }

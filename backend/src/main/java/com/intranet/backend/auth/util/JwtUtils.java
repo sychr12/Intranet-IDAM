@@ -11,7 +11,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import jakarta.servlet.http.HttpServletRequest;
-import java.security.Key;
+import javax.crypto.SecretKey;
 import java.util.Date;
 import java.util.Optional;
 
@@ -70,11 +70,11 @@ public class JwtUtils {
      */
     public Claims extractAllClaims(String token) {
         try {
-            return Jwts.parserBuilder()
-                    .setSigningKey(getSignKey())
+            return Jwts.parser()
+                    .verifyWith(getSignKey())
                     .build()
-                    .parseClaimsJws(token)
-                    .getBody();
+                    .parseSignedClaims(token)
+                    .getPayload();
         } catch (Exception e) {
             log.error("Erro ao extrair claims do token: {}", e.getMessage());
             throw new RuntimeException("Token inválido", e);
@@ -92,7 +92,7 @@ public class JwtUtils {
     /**
      * Obtém a chave de assinatura
      */
-    private Key getSignKey() {
+    private SecretKey getSignKey() {
         byte[] keyBytes = jwtSecret.getBytes();
         return Keys.hmacShaKeyFor(keyBytes);
     }

@@ -11,4 +11,11 @@ public record LoginRequest(
         String senha
 
 ) {
+    public String getUsername() {
+        return username;
+    }
+
+    public String getPassword() {
+        return senha;
+    }
 }

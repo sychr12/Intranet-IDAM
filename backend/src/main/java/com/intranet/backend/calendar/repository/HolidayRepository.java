@@ -2,6 +2,7 @@ package com.intranet.backend.calendar.repository;
 
 import com.intranet.backend.calendar.model.Holiday;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -38,5 +39,7 @@ public interface HolidayRepository extends JpaRepository<Holiday, String> {
     @Query("SELECT h FROM Holiday h WHERE h.country = :country AND h.date = :date")
     List<Holiday> findByDateAndCountry(@Param("date") LocalDate date, @Param("country") String country);
 
-    void deleteByCountryAndYear(String country, int year);
+    @Modifying
+    @Query("DELETE FROM Holiday h WHERE h.country = :country AND YEAR(h.date) = :year")
+    void deleteByCountryAndYear(@Param("country") String country, @Param("year") int year);
 }

@@ -21,11 +21,11 @@ public class DataInitializer implements CommandLineRunner {
         if (repository.count() == 0) {
 
             User admin = User.builder()
-                    .nome("Administrador")
+                    .fullName("Administrador")
                     .username("admin")
-                    .senha(passwordEncoder.encode("admin123"))
+                    .password(passwordEncoder.encode("admin123"))
                     .role(Role.ADMIN)
-                    .ativo(true)
+                    .isActive(true)
                     .build();
 
             repository.save(admin);

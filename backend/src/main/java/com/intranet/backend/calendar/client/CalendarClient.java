@@ -2,7 +2,7 @@ package com.intranet.backend.calendar.client;
 
 import com.intranet.backend.calendar.dto.CalendarApiResponse;
 import com.intranet.backend.common.exception.ExternalApiException;
-import com.intranet.backend.config.CalendarConfig;
+import com.intranet.backend.calendar.config.CalendarConfig;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatusCode;
