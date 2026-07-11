@@ -1,21 +1,23 @@
 package com.intranet.backend.calendar.controller;
 
+import java.time.LocalDate;
+import java.util.List;
+
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
+
 import com.intranet.backend.calendar.dto.CalendarRequestDTO;
 import com.intranet.backend.calendar.dto.CalendarResponseDTO;
 import com.intranet.backend.calendar.dto.EventDTO;
 import com.intranet.backend.calendar.dto.HolidayDTO;
 import com.intranet.backend.calendar.service.CalendarService;
 import com.intranet.backend.common.dto.ApiResponse;
+
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
-
-import java.time.LocalDate;
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/calendar")
@@ -29,23 +31,27 @@ public class CalendarController {
     @PreAuthorize("hasAnyRole('ADMIN', 'SUPORTE')")
     public ResponseEntity<ApiResponse<CalendarResponseDTO>> getCalendarData(
             @Valid @RequestBody CalendarRequestDTO request) {
-        log.info("Requisição para dados do calendário: {} - {}/{}", 
-                request.getCountry(), request.getYear(), request.getMonth());
+        log.info(
+                "Requisição para dados do calendário: {} - {}/{}",
+                request.getCountry(),
+                request.getYear(),
+                request.getMonth());
 
         CalendarResponseDTO response = calendarService.getCalendarData(request);
 
-        return ResponseEntity.ok(ApiResponse.success("Dados do calendário obtidos com sucesso", response));
+        return ResponseEntity.ok(
+                ApiResponse.success("Dados do calendário obtidos com sucesso", response));
     }
 
     @GetMapping("/holidays/{country}")
     @PreAuthorize("hasAnyRole('ADMIN', 'SUPORTE')")
     public ResponseEntity<ApiResponse<List<HolidayDTO>>> getHolidaysByCountryAndYear(
-            @PathVariable String country,
-            @RequestParam(defaultValue = "0") int year) {
+            @PathVariable String country, @RequestParam(defaultValue = "0") int year) {
         log.info("Requisição para feriados do país: {} no ano {}", country, year);
 
         int searchYear = year > 0 ? year : LocalDate.now().getYear();
-        List<HolidayDTO> holidays = calendarService.getHolidaysByCountryAndYear(country, searchYear);
+        List<HolidayDTO> holidays =
+                calendarService.getHolidaysByCountryAndYear(country, searchYear);
 
         return ResponseEntity.ok(ApiResponse.success("Feriados obtidos com sucesso", holidays));
     }
@@ -65,9 +71,7 @@ public class CalendarController {
     @GetMapping("/holidays/month")
     @PreAuthorize("hasAnyRole('ADMIN', 'SUPORTE')")
     public ResponseEntity<ApiResponse<List<HolidayDTO>>> getHolidaysForMonth(
-            @RequestParam String country,
-            @RequestParam int year,
-            @RequestParam int month) {
+            @RequestParam String country, @RequestParam int year, @RequestParam int month) {
         log.info("Requisição para feriados do mês {}/{} no país {}", month, year, country);
 
         List<HolidayDTO> holidays = calendarService.getHolidaysForMonth(country, year, month);
@@ -89,8 +93,7 @@ public class CalendarController {
     @PutMapping("/holidays/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<HolidayDTO>> updateHoliday(
-            @PathVariable String id,
-            @Valid @RequestBody HolidayDTO holidayDTO) {
+            @PathVariable String id, @Valid @RequestBody HolidayDTO holidayDTO) {
         log.info("Requisição para atualizar feriado: {}", id);
 
         HolidayDTO updated = calendarService.updateHoliday(id, holidayDTO);
@@ -116,7 +119,8 @@ public class CalendarController {
 
         List<EventDTO> events = calendarService.getUpcomingEvents(limit);
 
-        return ResponseEntity.ok(ApiResponse.success("Eventos futuros obtidos com sucesso", events));
+        return ResponseEntity.ok(
+                ApiResponse.success("Eventos futuros obtidos com sucesso", events));
     }
 
     @GetMapping("/events/date")
@@ -156,8 +160,7 @@ public class CalendarController {
     @PutMapping("/events/{id}")
     @PreAuthorize("hasAnyRole('ADMIN', 'SUPORTE')")
     public ResponseEntity<ApiResponse<EventDTO>> updateEvent(
-            @PathVariable String id,
-            @Valid @RequestBody EventDTO eventDTO) {
+            @PathVariable String id, @Valid @RequestBody EventDTO eventDTO) {
         log.info("Requisição para atualizar evento: {}", id);
 
         EventDTO updated = calendarService.updateEvent(id, eventDTO);
@@ -178,8 +181,7 @@ public class CalendarController {
     @PostMapping("/sync/{country}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<Void>> syncHolidays(
-            @PathVariable String country,
-            @RequestParam(defaultValue = "0") int year) {
+            @PathVariable String country, @RequestParam(defaultValue = "0") int year) {
         log.info("Requisição para sincronizar feriados: {} no ano {}", country, year);
 
         int syncYear = year > 0 ? year : LocalDate.now().getYear();
@@ -197,21 +199,22 @@ public class CalendarController {
 
         boolean isHoliday = calendarService.isHoliday(date, country);
 
-        return ResponseEntity.ok(ApiResponse.success(
-                String.format("Data %s %s feriado", date, isHoliday ? "é" : "não é"), 
-                isHoliday));
+        return ResponseEntity.ok(
+                ApiResponse.success(
+                        String.format("Data %s %s feriado", date, isHoliday ? "é" : "não é"),
+                        isHoliday));
     }
 
     @GetMapping("/statistics/{country}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<CalendarResponseDTO.CalendarStatisticsDTO>> getStatistics(
-            @PathVariable String country,
-            @RequestParam(defaultValue = "0") int year) {
+            @PathVariable String country, @RequestParam(defaultValue = "0") int year) {
         log.info("Requisição para estatísticas: {} no ano {}", country, year);
 
         int statsYear = year > 0 ? year : LocalDate.now().getYear();
         var statistics = calendarService.getStatistics(country, statsYear);
 
-        return ResponseEntity.ok(ApiResponse.success("Estatísticas obtidas com sucesso", statistics));
+        return ResponseEntity.ok(
+                ApiResponse.success("Estatísticas obtidas com sucesso", statistics));
     }
 }

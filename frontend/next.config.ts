@@ -1,12 +1,19 @@
 import type { NextConfig } from "next";
 
-const nextConfig: NextConfig = {
-  // O serverActions foi removido porque não é mais uma config válida no Next.js
-  // Caso precise aumentar limite de upload, isso deve ser feito na rota (ver abaixo).
+const backendUrl = process.env.BACKEND_URL ?? "http://localhost:8080";
 
+const nextConfig: NextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
+  async rewrites() {
+    return [
+      {
+        source: "/backend-api/:path*",
+        destination: `${backendUrl}/api/:path*`,
+      },
+    ];
+  },
 };
 
-module.exports = nextConfig;
+export default nextConfig;

@@ -1,18 +1,20 @@
 package com.intranet.backend.calendar.mapper;
 
-import com.intranet.backend.calendar.dto.CalendarApiResponse;
-import com.intranet.backend.calendar.dto.HolidayDTO;
-import com.intranet.backend.calendar.model.Holiday;
-import org.springframework.stereotype.Component;
-
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 
+import org.springframework.stereotype.Component;
+
+import com.intranet.backend.calendar.dto.CalendarApiResponse;
+import com.intranet.backend.calendar.dto.HolidayDTO;
+import com.intranet.backend.calendar.model.Holiday;
+
 @Component
 public class HolidayMapper {
 
-    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+    private static final DateTimeFormatter DATE_FORMATTER =
+            DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
     public HolidayDTO toDTO(Holiday holiday) {
         if (holiday == null) {
@@ -70,8 +72,10 @@ public class HolidayMapper {
                 .name(apiHoliday.getName())
                 .date(date)
                 .country(country)
-                .type(apiHoliday.getType() != null && !apiHoliday.getType().isEmpty() 
-                        ? apiHoliday.getType().get(0) : "National holiday")
+                .type(
+                        apiHoliday.getType() != null && !apiHoliday.getType().isEmpty()
+                                ? apiHoliday.getType().get(0)
+                                : "National holiday")
                 .description(apiHoliday.getDescription())
                 .isNational(true)
                 .isGlobal(apiHoliday.getGlobal() != null && apiHoliday.getGlobal())
@@ -84,7 +88,7 @@ public class HolidayMapper {
         if (date == null) {
             return null;
         }
-        
+
         return switch (date.getDayOfWeek()) {
             case MONDAY -> "Segunda-feira";
             case TUESDAY -> "Terça-feira";

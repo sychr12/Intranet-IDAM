@@ -1,13 +1,14 @@
 package com.intranet.backend.calendar.dto;
 
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.util.List;
 
 @Data
 @Builder
@@ -34,12 +35,16 @@ public class CalendarApiResponse {
         private Country country;
         private DateInfo date;
         private List<String> type;
+
         @JsonProperty("primary_type")
         private String primaryType;
+
         @JsonProperty("global")
         private Boolean global;
+
         @JsonProperty("canonical_url")
         private String canonicalUrl;
+
         private String urlid;
     }
 
@@ -55,8 +60,10 @@ public class CalendarApiResponse {
     public static class DateInfo {
         @JsonProperty("iso")
         private String iso;
+
         @JsonProperty("datetime")
         private DateTime datetime;
+
         private String timezone;
     }
 
@@ -67,8 +74,10 @@ public class CalendarApiResponse {
         private Integer month;
         private Integer day;
         private String dayName;
+
         @JsonProperty("day_of_week")
         private Integer dayOfWeek;
+
         @JsonProperty("weekday")
         private String weekday;
     }

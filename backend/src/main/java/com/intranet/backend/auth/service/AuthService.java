@@ -1,14 +1,5 @@
 package com.intranet.backend.auth.service;
 
-import com.intranet.backend.auth.dto.LoginRequest;
-import com.intranet.backend.auth.dto.LoginResponse;
-import com.intranet.backend.auth.dto.RefreshTokenRequest;
-import com.intranet.backend.auth.security.CustomUserDetailsService;
-import com.intranet.backend.common.exception.BusinessException;
-import com.intranet.backend.user.model.User;
-import com.intranet.backend.user.repository.UserRepository;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -16,6 +7,17 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import com.intranet.backend.auth.dto.LoginRequest;
+import com.intranet.backend.auth.dto.LoginResponse;
+import com.intranet.backend.auth.dto.RefreshTokenRequest;
+import com.intranet.backend.auth.security.CustomUserDetailsService;
+import com.intranet.backend.common.exception.BusinessException;
+import com.intranet.backend.user.model.User;
+import com.intranet.backend.user.repository.UserRepository;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
@@ -33,24 +35,26 @@ public class AuthService {
 
         try {
             // Autenticar usuário
-            Authentication authentication = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(
-                            loginRequest.getUsername(),
-                            loginRequest.getPassword()
-                    )
-            );
+            Authentication authentication =
+                    authenticationManager.authenticate(
+                            new UsernamePasswordAuthenticationToken(
+                                    loginRequest.getUsername(), loginRequest.getPassword()));
 
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
             // Carregar usuário
-            UserDetails userDetails = userDetailsService.loadUserByUsername(loginRequest.getUsername());
-            User user = userRepository.findByUsername(loginRequest.getUsername())
-                    .orElseThrow(() -> new BusinessException("Usuário não encontrado"));
+            UserDetails userDetails =
+                    userDetailsService.loadUserByUsername(loginRequest.getUsername());
+            User user =
+                    userRepository
+                            .findByUsername(loginRequest.getUsername())
+                            .orElseThrow(() -> new BusinessException("Usuário não encontrado"));
 
             // Verificar se usuário está ativo
             if (!user.getAtivo()) {
                 log.warn("Tentativa de login de usuário inativo: {}", loginRequest.getUsername());
-                throw new BusinessException("Usuário inativo. Entre em contato com o administrador.");
+                throw new BusinessException(
+                        "Usuário inativo. Entre em contato com o administrador.");
             }
 
             // Gerar tokens
@@ -65,15 +69,16 @@ public class AuthService {
                     .refreshToken(refreshToken)
                     .tokenType("Bearer")
                     .expiresIn(jwtService.extractExpiration(accessToken).getTime())
-                    .user(LoginResponse.UserInfo.builder()
-                            .id(user.getId())
-                            .nome(user.getNome())
-                            .username(user.getUsername())
-                            .email(user.getEmail())
-                            .role(user.getRole().name())
-                            .foto(user.getFoto())
-                            .ativo(user.getAtivo())
-                            .build())
+                    .user(
+                            LoginResponse.UserInfo.builder()
+                                    .id(user.getId())
+                                    .nome(user.getNome())
+                                    .username(user.getUsername())
+                                    .email(user.getEmail())
+                                    .role(user.getRole().name())
+                                    .foto(user.getFoto())
+                                    .ativo(user.getAtivo())
+                                    .build())
                     .build();
 
         } catch (Exception e) {
@@ -102,8 +107,10 @@ public class AuthService {
         String newAccessToken = jwtService.generateToken(userDetails);
 
         // Buscar usuário para informações
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new BusinessException("Usuário não encontrado"));
+        User user =
+                userRepository
+                        .findByUsername(username)
+                        .orElseThrow(() -> new BusinessException("Usuário não encontrado"));
 
         log.info("Refresh token gerado com sucesso para: {}", username);
 
@@ -112,15 +119,16 @@ public class AuthService {
                 .refreshToken(refreshToken) // Manter o mesmo refresh token
                 .tokenType("Bearer")
                 .expiresIn(jwtService.extractExpiration(newAccessToken).getTime())
-                .user(LoginResponse.UserInfo.builder()
-                        .id(user.getId())
-                        .nome(user.getNome())
-                        .username(user.getUsername())
-                        .email(user.getEmail())
-                        .role(user.getRole().name())
-                        .foto(user.getFoto())
-                        .ativo(user.getAtivo())
-                        .build())
+                .user(
+                        LoginResponse.UserInfo.builder()
+                                .id(user.getId())
+                                .nome(user.getNome())
+                                .username(user.getUsername())
+                                .email(user.getEmail())
+                                .role(user.getRole().name())
+                                .foto(user.getFoto())
+                                .ativo(user.getAtivo())
+                                .build())
                 .build();
     }
 
@@ -138,7 +146,8 @@ public class AuthService {
         }
 
         String username = authentication.getName();
-        return userRepository.findByUsername(username)
+        return userRepository
+                .findByUsername(username)
                 .orElseThrow(() -> new BusinessException("Usuário não encontrado"));
     }
 }

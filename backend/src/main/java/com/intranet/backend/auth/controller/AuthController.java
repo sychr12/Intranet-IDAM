@@ -1,15 +1,17 @@
 package com.intranet.backend.auth.controller;
 
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
 import com.intranet.backend.auth.dto.LoginRequest;
 import com.intranet.backend.auth.dto.LoginResponse;
 import com.intranet.backend.auth.dto.RefreshTokenRequest;
 import com.intranet.backend.auth.service.AuthService;
 import com.intranet.backend.common.dto.ApiResponse;
+
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -20,7 +22,8 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/login")
-    public ResponseEntity<ApiResponse<LoginResponse>> login(@Valid @RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<ApiResponse<LoginResponse>> login(
+            @Valid @RequestBody LoginRequest loginRequest) {
         log.info("Requisição de login para: {}", loginRequest.getUsername());
 
         LoginResponse loginResponse = authService.login(loginRequest);
@@ -29,16 +32,19 @@ public class AuthController {
     }
 
     @PostMapping("/refresh")
-    public ResponseEntity<ApiResponse<LoginResponse>> refreshToken(@Valid @RequestBody RefreshTokenRequest request) {
+    public ResponseEntity<ApiResponse<LoginResponse>> refreshToken(
+            @Valid @RequestBody RefreshTokenRequest request) {
         log.info("Requisição de refresh token");
 
         LoginResponse loginResponse = authService.refreshToken(request);
 
-        return ResponseEntity.ok(ApiResponse.success("Token atualizado com sucesso", loginResponse));
+        return ResponseEntity.ok(
+                ApiResponse.success("Token atualizado com sucesso", loginResponse));
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<ApiResponse<Void>> logout(@RequestHeader("Authorization") String authorization) {
+    public ResponseEntity<ApiResponse<Void>> logout(
+            @RequestHeader("Authorization") String authorization) {
         log.info("Requisição de logout");
 
         if (authorization != null && authorization.startsWith("Bearer ")) {
@@ -55,16 +61,18 @@ public class AuthController {
 
         var user = authService.getCurrentUser();
 
-        LoginResponse.UserInfo userInfo = LoginResponse.UserInfo.builder()
-                .id(user.getId())
-                .nome(user.getNome())
-                .username(user.getUsername())
-                .email(user.getEmail())
-                .role(user.getRole().name())
-                .foto(user.getFoto())
-                .ativo(user.getAtivo())
-                .build();
+        LoginResponse.UserInfo userInfo =
+                LoginResponse.UserInfo.builder()
+                        .id(user.getId())
+                        .nome(user.getNome())
+                        .username(user.getUsername())
+                        .email(user.getEmail())
+                        .role(user.getRole().name())
+                        .foto(user.getFoto())
+                        .ativo(user.getAtivo())
+                        .build();
 
-        return ResponseEntity.ok(ApiResponse.success("Dados do usuário obtidos com sucesso", userInfo));
+        return ResponseEntity.ok(
+                ApiResponse.success("Dados do usuário obtidos com sucesso", userInfo));
     }
 }

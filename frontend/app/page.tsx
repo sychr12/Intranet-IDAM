@@ -58,6 +58,14 @@ interface NewsItem {
   href: string;
 }
 
+interface BackendHealthResponse {
+  success: boolean;
+  data?: {
+    status?: string;
+    timestamp?: string;
+  };
+}
+
 // =================================================================
 // 2. TOKENS DE DESIGN
 // =================================================================
@@ -274,23 +282,26 @@ export default function Page() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [now, setNow] = useState<Date>(new Date());
   const [loadingDate, setLoadingDate] = useState(true);
+  const [backendOnline, setBackendOnline] = useState<boolean | null>(null);
 
   useEffect(() => {
-    async function fetchServerTime() {
+    async function fetchBackendHealth() {
       setLoadingDate(true);
       try {
-        const res = await fetch("https://worldtimeapi.org/api/timezone/America/Manaus");
-        if (!res.ok) throw new Error("Erro ao obter hora do servidor");
-        const data = await res.json();
-        const serverDate = new Date(data.datetime);
+        const res = await fetch("/backend-api/health", { cache: "no-store" });
+        if (!res.ok) throw new Error("Erro ao obter o status do backend");
+        const response: BackendHealthResponse = await res.json();
+        const serverDate = new Date(response.data?.timestamp ?? "");
         if (!isNaN(serverDate.getTime())) setNow(serverDate);
+        setBackendOnline(response.success && response.data?.status === "UP");
       } catch (err) {
         console.error("❌ Erro ao buscar hora do servidor:", err);
+        setBackendOnline(false);
       } finally {
         setLoadingDate(false);
       }
     }
-    fetchServerTime();
+    fetchBackendHealth();
   }, []);
 
   const formattedDateTime = now.toLocaleString("pt-BR", {
@@ -677,7 +688,12 @@ export default function Page() {
             </span>
             <span className="flex items-center gap-2">
               <Globe className="w-3.5 h-3.5 text-[#8fae6a]" />
-              intranet.idam.am.gov.br
+              <span
+                className={`w-2 h-2 rounded-full ${
+                  backendOnline === false ? "bg-red-400" : backendOnline ? "bg-[#8fae6a]" : "bg-white/30"
+                }`}
+              />
+              Backend {backendOnline === false ? "indisponível" : backendOnline ? "conectado" : "verificando"}
             </span>
           </div>
         </footer>

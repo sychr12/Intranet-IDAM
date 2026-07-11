@@ -1,7 +1,20 @@
 package com.intranet.backend.calendar.service;
 
-import com.intranet.backend.calendar.dto.CalendarApiResponse;
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.YearMonth;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.intranet.backend.calendar.client.CalendarClient;
+import com.intranet.backend.calendar.dto.CalendarApiResponse;
 import com.intranet.backend.calendar.dto.CalendarRequestDTO;
 import com.intranet.backend.calendar.dto.CalendarResponseDTO;
 import com.intranet.backend.calendar.dto.EventDTO;
@@ -13,22 +26,11 @@ import com.intranet.backend.calendar.model.Holiday;
 import com.intranet.backend.calendar.repository.EventRepository;
 import com.intranet.backend.calendar.repository.HolidayRepository;
 import com.intranet.backend.common.exception.BusinessException;
-import com.intranet.backend.common.exception.ResourceNotFoundException;
 import com.intranet.backend.common.exception.ExternalApiException;
+import com.intranet.backend.common.exception.ResourceNotFoundException;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.time.DayOfWeek;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.YearMonth;
-import java.time.format.DateTimeFormatter;
-import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -42,16 +44,24 @@ public class CalendarServiceImpl implements CalendarService {
     private final EventMapper eventMapper;
     private final CalendarClient calendarClient;
 
-    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+    private static final DateTimeFormatter DATE_FORMATTER =
+            DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
     @Override
-    @Cacheable(value = "calendarData", key = "#request.country + '_' + #request.year + '_' + #request.month + '_' + #request.language")
+    @Cacheable(
+            value = "calendarData",
+            key =
+                    "#request.country + '_' + #request.year + '_' + #request.month + '_' + #request.language")
     public CalendarResponseDTO getCalendarData(CalendarRequestDTO request) {
-        log.info("Obtendo dados do calendário para: {} no ano {}/{}", 
-                request.getCountry(), request.getYear(), request.getMonth());
+        log.info(
+                "Obtendo dados do calendário para: {} no ano {}/{}",
+                request.getCountry(),
+                request.getYear(),
+                request.getMonth());
 
         int year = request.getYear() != null ? request.getYear() : LocalDate.now().getYear();
-        int month = request.getMonth() != null ? request.getMonth() : LocalDate.now().getMonthValue();
+        int month =
+                request.getMonth() != null ? request.getMonth() : LocalDate.now().getMonthValue();
         String country = request.getCountry().toUpperCase();
 
         // Sincronizar feriados da API se necessário
@@ -60,13 +70,17 @@ public class CalendarServiceImpl implements CalendarService {
         }
 
         // Buscar feriados do banco de dados
-        List<Holiday> holidays = holidayRepository.findByCountryAndYearAndMonth(country, year, month);
-        
+        List<Holiday> holidays =
+                holidayRepository.findByCountryAndYearAndMonth(country, year, month);
+
         // Buscar eventos
         LocalDateTime startOfMonth = LocalDateTime.of(year, month, 1, 0, 0);
-        LocalDateTime endOfMonth = startOfMonth.withDayOfMonth(
-                YearMonth.of(year, month).lengthOfMonth()
-        ).withHour(23).withMinute(59).withSecond(59);
+        LocalDateTime endOfMonth =
+                startOfMonth
+                        .withDayOfMonth(YearMonth.of(year, month).lengthOfMonth())
+                        .withHour(23)
+                        .withMinute(59)
+                        .withSecond(59);
 
         List<Event> events = eventRepository.findEventsBetweenDates(startOfMonth, endOfMonth);
 
@@ -80,23 +94,28 @@ public class CalendarServiceImpl implements CalendarService {
 
         try {
             CalendarApiResponse response = calendarClient.getHolidays(country, year);
-            
-            if (response != null && response.getResponse() != null 
+
+            if (response != null
+                    && response.getResponse() != null
                     && response.getResponse().getHolidays() != null) {
-                
+
                 // Remover feriados antigos do ano
                 holidayRepository.deleteByCountryAndYear(country, year);
-                
+
                 // Salvar novos feriados
                 int savedCount = 0;
-                for (CalendarApiResponse.Holiday apiHoliday : response.getResponse().getHolidays()) {
+                for (CalendarApiResponse.Holiday apiHoliday :
+                        response.getResponse().getHolidays()) {
                     Holiday holiday = holidayMapper.toEntity(apiHoliday, country);
                     holidayRepository.save(holiday);
                     savedCount++;
                 }
-                
-                log.info("Sincronização concluída. {} feriados salvos para {} em {}", 
-                        savedCount, country, year);
+
+                log.info(
+                        "Sincronização concluída. {} feriados salvos para {} em {}",
+                        savedCount,
+                        country,
+                        year);
             }
         } catch (ExternalApiException e) {
             log.error("Erro ao sincronizar feriados: {}", e.getMessage());
@@ -108,9 +127,8 @@ public class CalendarServiceImpl implements CalendarService {
     @Cacheable(value = "holidays", key = "#country + '_' + #year")
     public List<HolidayDTO> getHolidaysByCountryAndYear(String country, int year) {
         log.info("Buscando feriados para: {} no ano {}", country, year);
-        
-        return holidayRepository.findByCountryAndYear(country, year)
-                .stream()
+
+        return holidayRepository.findByCountryAndYear(country, year).stream()
                 .map(holidayMapper::toDTO)
                 .collect(Collectors.toList());
     }
@@ -118,20 +136,17 @@ public class CalendarServiceImpl implements CalendarService {
     @Override
     public List<HolidayDTO> getHolidaysForDate(LocalDate date, String country) {
         log.info("Buscando feriados para a data: {} no país {}", date, country);
-        
+
         List<Holiday> holidays = holidayRepository.findByDateAndCountry(date, country);
-        
-        return holidays.stream()
-                .map(holidayMapper::toDTO)
-                .collect(Collectors.toList());
+
+        return holidays.stream().map(holidayMapper::toDTO).collect(Collectors.toList());
     }
 
     @Override
     public List<HolidayDTO> getHolidaysForMonth(String country, int year, int month) {
         log.info("Buscando feriados para o mês {}/{} no país {}", month, year, country);
-        
-        return holidayRepository.findByCountryAndYearAndMonth(country, year, month)
-                .stream()
+
+        return holidayRepository.findByCountryAndYearAndMonth(country, year, month).stream()
                 .map(holidayMapper::toDTO)
                 .collect(Collectors.toList());
     }
@@ -148,7 +163,7 @@ public class CalendarServiceImpl implements CalendarService {
 
         Holiday holiday = holidayMapper.toEntity(holidayDTO);
         Holiday saved = holidayRepository.save(holiday);
-        
+
         return holidayMapper.toDTO(saved);
     }
 
@@ -156,13 +171,15 @@ public class CalendarServiceImpl implements CalendarService {
     public HolidayDTO updateHoliday(String id, HolidayDTO holidayDTO) {
         log.info("Atualizando feriado: {}", id);
 
-        Holiday holiday = holidayRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Feriado não encontrado"));
+        Holiday holiday =
+                holidayRepository
+                        .findById(id)
+                        .orElseThrow(() -> new ResourceNotFoundException("Feriado não encontrado"));
 
         // Verificar se a data está sendo alterada
-        if (!holiday.getDate().equals(holidayDTO.getDate()) && 
-            holidayRepository.existsByDateAndCountryAndName(
-                    holidayDTO.getDate(), holidayDTO.getCountry(), holidayDTO.getName())) {
+        if (!holiday.getDate().equals(holidayDTO.getDate())
+                && holidayRepository.existsByDateAndCountryAndName(
+                        holidayDTO.getDate(), holidayDTO.getCountry(), holidayDTO.getName())) {
             throw new BusinessException("Já existe um feriado cadastrado com este nome nesta data");
         }
 
@@ -179,26 +196,27 @@ public class CalendarServiceImpl implements CalendarService {
     }
 
     @Override
-    @CacheEvict(value = {"holidays", "calendarData"}, allEntries = true)
+    @CacheEvict(
+            value = {"holidays", "calendarData"},
+            allEntries = true)
     public void deleteHoliday(String id) {
         log.info("Deletando feriado: {}", id);
-        
+
         if (!holidayRepository.existsById(id)) {
             throw new ResourceNotFoundException("Feriado não encontrado");
         }
-        
+
         holidayRepository.deleteById(id);
     }
 
     @Override
     public List<EventDTO> getEventsBetweenDates(LocalDate startDate, LocalDate endDate) {
         log.info("Buscando eventos entre {} e {}", startDate, endDate);
-        
+
         LocalDateTime start = startDate.atStartOfDay();
         LocalDateTime end = endDate.atTime(23, 59, 59);
-        
-        return eventRepository.findEventsBetweenDates(start, end)
-                .stream()
+
+        return eventRepository.findEventsBetweenDates(start, end).stream()
                 .map(eventMapper::toDTO)
                 .collect(Collectors.toList());
     }
@@ -206,9 +224,8 @@ public class CalendarServiceImpl implements CalendarService {
     @Override
     public List<EventDTO> getEventsByDate(LocalDate date) {
         log.info("Buscando eventos para a data: {}", date);
-        
-        return eventRepository.findEventsByDate(date)
-                .stream()
+
+        return eventRepository.findEventsByDate(date).stream()
                 .map(eventMapper::toDTO)
                 .collect(Collectors.toList());
     }
@@ -216,9 +233,8 @@ public class CalendarServiceImpl implements CalendarService {
     @Override
     public List<EventDTO> getUpcomingEvents(int limit) {
         log.info("Buscando eventos futuros (limite: {})", limit);
-        
-        return eventRepository.findUpcomingEvents(LocalDateTime.now())
-                .stream()
+
+        return eventRepository.findUpcomingEvents(LocalDateTime.now()).stream()
                 .limit(limit)
                 .map(eventMapper::toDTO)
                 .collect(Collectors.toList());
@@ -234,9 +250,9 @@ public class CalendarServiceImpl implements CalendarService {
         event.setCreatedBy(getCurrentUsername());
         event.setCreatedById(getCurrentUserId());
         event.setStatus("SCHEDULED");
-        
+
         Event saved = eventRepository.save(event);
-        
+
         return eventMapper.toDTO(saved);
     }
 
@@ -244,8 +260,10 @@ public class CalendarServiceImpl implements CalendarService {
     public EventDTO updateEvent(String id, EventDTO eventDTO) {
         log.info("Atualizando evento: {}", id);
 
-        Event event = eventRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Evento não encontrado"));
+        Event event =
+                eventRepository
+                        .findById(id)
+                        .orElseThrow(() -> new ResourceNotFoundException("Evento não encontrado"));
 
         validateEventDates(eventDTO);
 
@@ -269,11 +287,11 @@ public class CalendarServiceImpl implements CalendarService {
     @Override
     public void deleteEvent(String id) {
         log.info("Deletando evento: {}", id);
-        
+
         if (!eventRepository.existsById(id)) {
             throw new ResourceNotFoundException("Evento não encontrado");
         }
-        
+
         eventRepository.deleteById(id);
     }
 
@@ -296,31 +314,36 @@ public class CalendarServiceImpl implements CalendarService {
         long workingDays = totalDays - weekends - holidays.size();
 
         // Distribuição de feriados por tipo
-        Map<String, Long> holidayDistribution = holidays.stream()
-                .collect(Collectors.groupingBy(
-                        h -> h.getType() != null ? h.getType() : "Outros",
-                        Collectors.counting()
-                ));
+        Map<String, Long> holidayDistribution =
+                holidays.stream()
+                        .collect(
+                                Collectors.groupingBy(
+                                        h -> h.getType() != null ? h.getType() : "Outros",
+                                        Collectors.counting()));
 
-        List<CalendarResponseDTO.HolidayStatisticsDTO> distribution = holidayDistribution.entrySet().stream()
-                .map(entry -> CalendarResponseDTO.HolidayStatisticsDTO.builder()
-                        .type(entry.getKey())
-                        .count(entry.getValue())
-                        .description(entry.getKey())
-                        .build())
-                .collect(Collectors.toList());
+        List<CalendarResponseDTO.HolidayStatisticsDTO> distribution =
+                holidayDistribution.entrySet().stream()
+                        .map(
+                                entry ->
+                                        CalendarResponseDTO.HolidayStatisticsDTO.builder()
+                                                .type(entry.getKey())
+                                                .count(entry.getValue())
+                                                .description(entry.getKey())
+                                                .build())
+                        .collect(Collectors.toList());
 
         // Mês com mais feriados
-        Map<Integer, Long> holidaysByMonth = holidays.stream()
-                .collect(Collectors.groupingBy(
-                        h -> h.getDate().getMonthValue(),
-                        Collectors.counting()
-                ));
+        Map<Integer, Long> holidaysByMonth =
+                holidays.stream()
+                        .collect(
+                                Collectors.groupingBy(
+                                        h -> h.getDate().getMonthValue(), Collectors.counting()));
 
-        String monthWithMostHolidays = holidaysByMonth.entrySet().stream()
-                .max(Map.Entry.comparingByValue())
-                .map(entry -> getMonthName(entry.getKey()))
-                .orElse("N/A");
+        String monthWithMostHolidays =
+                holidaysByMonth.entrySet().stream()
+                        .max(Map.Entry.comparingByValue())
+                        .map(entry -> getMonthName(entry.getKey()))
+                        .orElse("N/A");
 
         return CalendarResponseDTO.CalendarStatisticsDTO.builder()
                 .totalDays(totalDays)
@@ -337,9 +360,13 @@ public class CalendarServiceImpl implements CalendarService {
 
     // Métodos auxiliares privados
 
-    private CalendarResponseDTO buildCalendarResponse(String country, int year, int month,
-                                                       List<Holiday> holidays, List<Event> events,
-                                                       CalendarRequestDTO request) {
+    private CalendarResponseDTO buildCalendarResponse(
+            String country,
+            int year,
+            int month,
+            List<Holiday> holidays,
+            List<Event> events,
+            CalendarRequestDTO request) {
         YearMonth yearMonth = YearMonth.of(year, month);
         LocalDate firstDay = yearMonth.atDay(1);
         LocalDate lastDay = yearMonth.atEndOfMonth();
@@ -352,9 +379,8 @@ public class CalendarServiceImpl implements CalendarService {
         while (!currentDate.isAfter(lastDay)) {
             LocalDate dateForDay = currentDate;
             boolean isWeekend = isWeekend(dateForDay);
-            List<Holiday> dayHolidays = holidays.stream()
-                    .filter(h -> h.getDate().equals(dateForDay))
-                    .toList();
+            List<Holiday> dayHolidays =
+                    holidays.stream().filter(h -> h.getDate().equals(dateForDay)).toList();
             boolean isHoliday = !dayHolidays.isEmpty();
             boolean isWorkingDay = !isWeekend && !isHoliday;
 
@@ -367,23 +393,31 @@ public class CalendarServiceImpl implements CalendarService {
 
             String holidayName = isHoliday ? dayHolidays.get(0).getName() : null;
 
-            List<Event> dayEvents = events.stream()
-                    .filter(e -> e.getStartDateTime().toLocalDate().equals(dateForDay))
-                    .toList();
+            List<Event> dayEvents =
+                    events.stream()
+                            .filter(e -> e.getStartDateTime().toLocalDate().equals(dateForDay))
+                            .toList();
 
-            calendarDays.add(CalendarResponseDTO.CalendarDayDTO.builder()
-                    .date(dateForDay)
-                    .dayOfMonth(dateForDay.getDayOfMonth())
-                    .dayOfWeek(getDayOfWeekPortuguese(dateForDay))
-                    .dayOfWeekShort(getDayOfWeekShortPortuguese(dateForDay))
-                    .isWeekend(isWeekend)
-                    .isHoliday(isHoliday)
-                    .isWorkingDay(isWorkingDay)
-                    .holidayName(holidayName)
-                    .holidays(dayHolidays.stream().map(holidayMapper::toDTO).collect(Collectors.toList()))
-                    .events(dayEvents.stream().map(eventMapper::toDTO).collect(Collectors.toList()))
-                    .formattedDate(dateForDay.format(DATE_FORMATTER))
-                    .build());
+            calendarDays.add(
+                    CalendarResponseDTO.CalendarDayDTO.builder()
+                            .date(dateForDay)
+                            .dayOfMonth(dateForDay.getDayOfMonth())
+                            .dayOfWeek(getDayOfWeekPortuguese(dateForDay))
+                            .dayOfWeekShort(getDayOfWeekShortPortuguese(dateForDay))
+                            .isWeekend(isWeekend)
+                            .isHoliday(isHoliday)
+                            .isWorkingDay(isWorkingDay)
+                            .holidayName(holidayName)
+                            .holidays(
+                                    dayHolidays.stream()
+                                            .map(holidayMapper::toDTO)
+                                            .collect(Collectors.toList()))
+                            .events(
+                                    dayEvents.stream()
+                                            .map(eventMapper::toDTO)
+                                            .collect(Collectors.toList()))
+                            .formattedDate(dateForDay.format(DATE_FORMATTER))
+                            .build());
 
             currentDate = currentDate.plusDays(1);
         }
@@ -409,13 +443,10 @@ public class CalendarServiceImpl implements CalendarService {
                 .build();
     }
 
-    private CalendarResponseDTO.CalendarStatisticsDTO buildStatistics(YearMonth yearMonth,
-                                                                       List<Holiday> holidays,
-                                                                       List<Event> events) {
+    private CalendarResponseDTO.CalendarStatisticsDTO buildStatistics(
+            YearMonth yearMonth, List<Holiday> holidays, List<Event> events) {
         int totalDays = yearMonth.lengthOfMonth();
-        long weekends = holidays.stream()
-                .filter(h -> isWeekend(h.getDate()))
-                .count();
+        long weekends = holidays.stream().filter(h -> isWeekend(h.getDate())).count();
 
         return CalendarResponseDTO.CalendarStatisticsDTO.builder()
                 .totalDays(totalDays)
@@ -477,11 +508,12 @@ public class CalendarServiceImpl implements CalendarService {
             return "N/A";
         }
 
-        Map<LocalDate, Long> eventsByDay = events.stream()
-                .collect(Collectors.groupingBy(
-                        e -> e.getStartDateTime().toLocalDate(),
-                        Collectors.counting()
-                ));
+        Map<LocalDate, Long> eventsByDay =
+                events.stream()
+                        .collect(
+                                Collectors.groupingBy(
+                                        e -> e.getStartDateTime().toLocalDate(),
+                                        Collectors.counting()));
 
         return eventsByDay.entrySet().stream()
                 .max(Map.Entry.comparingByValue())
@@ -491,9 +523,9 @@ public class CalendarServiceImpl implements CalendarService {
 
     private String getMonthName(int month) {
         String[] months = {
-                "Janeiro", "Fevereiro", "Março", "Abril",
-                "Maio", "Junho", "Julho", "Agosto",
-                "Setembro", "Outubro", "Novembro", "Dezembro"
+            "Janeiro", "Fevereiro", "Março", "Abril",
+            "Maio", "Junho", "Julho", "Agosto",
+            "Setembro", "Outubro", "Novembro", "Dezembro"
         };
         return months[month - 1];
     }

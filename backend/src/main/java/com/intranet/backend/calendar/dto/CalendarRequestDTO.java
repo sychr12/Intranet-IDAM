@@ -7,8 +7,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDate;
-
 @Data
 @Builder
 @NoArgsConstructor
@@ -25,18 +23,13 @@ public class CalendarRequestDTO {
 
     private Integer day;
 
-    @Builder.Default
-    private Boolean includeHolidays = true;
+    @Builder.Default private Boolean includeHolidays = true;
 
-    @Builder.Default
-    private Boolean includeEvents = true;
+    @Builder.Default private Boolean includeEvents = true;
 
-    @Builder.Default
-    private Boolean includeWeekends = true;
+    @Builder.Default private Boolean includeWeekends = true;
 
-    @Builder.Default
-    private String language = "pt";
+    @Builder.Default private String language = "pt";
 
-    @Builder.Default
-    private Boolean syncFromApi = true;
+    @Builder.Default private Boolean syncFromApi = true;
 }

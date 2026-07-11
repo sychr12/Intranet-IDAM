@@ -1,17 +1,18 @@
 package com.intranet.backend.calendar.mapper;
 
-import com.intranet.backend.calendar.dto.EventDTO;
-import com.intranet.backend.calendar.model.Event;
-import org.springframework.stereotype.Component;
-
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
+import org.springframework.stereotype.Component;
+
+import com.intranet.backend.calendar.dto.EventDTO;
+import com.intranet.backend.calendar.model.Event;
+
 @Component
 public class EventMapper {
 
-    private static final DateTimeFormatter DATE_TIME_FORMATTER = 
+    private static final DateTimeFormatter DATE_TIME_FORMATTER =
             DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
     public EventDTO toDTO(Event event) {
