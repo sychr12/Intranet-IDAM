@@ -1,15 +1,17 @@
 @import "tailwindcss";
 
+
 /* Tailwind utilities */
 
-/* Tema do Tailwind v4 */
+
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+
 }
 
-/* Estilos base */
 body {
   background: var(--background);
   color: var(--foreground);
-}
+};
