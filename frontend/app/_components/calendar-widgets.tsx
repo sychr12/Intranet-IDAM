@@ -78,7 +78,7 @@ export function MiniCalendar({
   return (
     <ShellCard className="min-h-[252px] p-4 sm:p-5">
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-        <h2 className="flex items-center gap-2 text-base font-black text-[#0b3a22]">
+        <h2 className="flex items-center gap-2 text-[17px] font-black text-[#0b3a22]">
           <span className="flex size-9 items-center justify-center rounded-[10px] bg-[#e8f5d8] text-[#0b6a20]">
             <CalendarDays className="size-5.5" />
           </span>
@@ -90,13 +90,13 @@ export function MiniCalendar({
               updateCursor(new Date(today.getFullYear(), today.getMonth(), 1))
             }
             disabled={isViewingCurrentMonth}
-            className="h-11 rounded-[10px] border border-[#dce6d8] px-3 text-[0.68rem] font-bold text-[#47722b] transition hover:bg-[#edf7df] disabled:cursor-default disabled:bg-[#f2f6ee] disabled:text-[#9aa895]"
+            className="h-12 rounded-[10px] border border-[#dce6d8] px-4 text-[17px] font-bold text-[#47722b] transition hover:bg-[#edf7df] disabled:cursor-default disabled:bg-[#f2f6ee] disabled:text-[#9aa895]"
           >
             Hoje
           </button>
-          <div className="flex h-11 items-center overflow-hidden rounded-[11px] border border-[#dce6d8] bg-[#f8faf6] text-xs font-bold text-[#121d16] shadow-[0_3px_10px_rgba(11,52,36,0.05)]">
+          <div className="flex h-12 items-center overflow-hidden rounded-[11px] border border-[#dce6d8] bg-[#f8faf6] text-[17px] font-bold text-[#121d16] shadow-[0_3px_10px_rgba(11,52,36,0.05)]">
             <button
-              className="flex size-11 items-center justify-center border-r border-[#e2e9de] transition hover:bg-[#eaf5de]"
+              className="flex size-12 items-center justify-center border-r border-[#e2e9de] transition hover:bg-[#eaf5de]"
               onClick={() =>
                 updateCursor(new Date(cursor.getFullYear(), cursor.getMonth() - 1, 1))
               }
@@ -104,11 +104,11 @@ export function MiniCalendar({
             >
               <ChevronLeft className="size-5" />
             </button>
-            <span className="min-w-[138px] px-3 text-center sm:min-w-[152px]">
+            <span className="min-w-[166px] px-3 text-center sm:min-w-[188px]">
               {months[cursor.getMonth()]} de {cursor.getFullYear()}
             </span>
             <button
-              className="flex size-11 items-center justify-center border-l border-[#e2e9de] transition hover:bg-[#eaf5de]"
+              className="flex size-12 items-center justify-center border-l border-[#e2e9de] transition hover:bg-[#eaf5de]"
               onClick={() =>
                 updateCursor(new Date(cursor.getFullYear(), cursor.getMonth() + 1, 1))
               }
@@ -125,7 +125,7 @@ export function MiniCalendar({
           {weekdays.map((day, index) => (
             <span
               key={day}
-              className={`text-[0.62rem] font-black ${index > 4 ? "text-[#6d8e4d]" : "text-[#456452]"}`}
+              className={`text-[17px] font-black ${index > 4 ? "text-[#6d8e4d]" : "text-[#456452]"}`}
             >
               {day}
             </span>
@@ -137,7 +137,7 @@ export function MiniCalendar({
             aria-label="Carregando calendário"
           >
             {Array.from({ length: 42 }, (_, index) => (
-              <span key={index} className="mx-auto size-8 rounded-full bg-[#eef2eb]" />
+              <span key={index} className="mx-auto size-9 rounded-full bg-[#eef2eb] sm:size-10" />
             ))}
           </div>
         ) : (
@@ -155,7 +155,7 @@ export function MiniCalendar({
                       ? `${holiday.name} - ${holidayScopeLabels[holiday.scope]}`
                       : undefined
                   }
-                  className={`relative mx-auto flex size-8 items-center justify-center rounded-full text-[0.74rem] transition ${
+                  className={`relative mx-auto flex size-9 items-center justify-center rounded-full text-[17px] transition sm:size-10 ${
                     todayDate
                       ? "bg-[#0c711f] font-black text-white ring-4 ring-[#dff0cf] shadow-[0_5px_12px_rgba(12,113,31,0.24)]"
                       : holiday && isCurrentMonth
@@ -181,12 +181,12 @@ export function MiniCalendar({
         )}
       </div>
 
-      <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-[0.65rem] font-semibold text-[#647067]">
+      <div className="mt-4 flex flex-wrap items-center gap-x-6 gap-y-3 text-[17px] font-semibold text-[#647067]">
         <span className="flex items-center gap-1.5">
-          <span className="size-2.5 rounded-full bg-[#0c711f]" /> Hoje
+          <span className="size-4 rounded-full bg-[#0c711f]" /> Hoje
         </span>
         <span className="flex items-center gap-1.5">
-          <span className="size-2.5 rounded-full bg-[#e0b226] ring-2 ring-[#fff2bd]" />
+          <span className="size-4 rounded-full bg-[#e0b226] ring-2 ring-[#fff2bd]" />
           Feriado
         </span>
         {holidaysLoading && (
@@ -229,8 +229,8 @@ export function Notices({ today, holidays, loading, unavailable }: NoticesProps)
   return (
     <ShellCard className="flex min-h-[236px] flex-col p-4 sm:p-5">
       <div className="mb-3 flex items-center justify-between border-b border-[#e7ece4] pb-3">
-        <h2 className="text-base font-black text-[#0a2d1e]">Avisos</h2>
-        <span className="rounded-full bg-[#fff4c9] px-2.5 py-1 text-[0.62rem] font-bold uppercase text-[#806000]">
+        <h2 className="text-[17px] font-black text-[#0a2d1e]">Avisos</h2>
+        <span className="rounded-full bg-[#fff4c9] px-3 py-1.5 text-[17px] font-bold uppercase text-[#806000]">
           Feriados
         </span>
       </div>
@@ -246,20 +246,20 @@ export function Notices({ today, holidays, loading, unavailable }: NoticesProps)
             </div>
           ) : nextHoliday ? (
             <>
-              <p className="mb-1 text-[0.65rem] font-black uppercase text-[#8a6800]">
+              <p className="mb-1 text-[17px] font-black uppercase text-[#8a6800]">
                 {daysUntil === 0 ? "Feriado de hoje" : "Próximo feriado"}
               </p>
-              <h3 className="mb-1 text-sm font-black leading-tight text-[#153924]">
+              <h3 className="mb-1 text-[17px] font-black leading-tight text-[#153924]">
                 {nextHoliday.name}
               </h3>
-              <p className="text-[0.74rem] capitalize leading-relaxed text-[#617067]">
+              <p className="text-[17px] capitalize leading-relaxed text-[#617067]">
                 {dateLabel}
               </p>
               <div className="mt-2 flex flex-wrap gap-1.5">
-                <span className="rounded-full bg-[#edf7df] px-2 py-1 text-[0.6rem] font-bold text-[#527f13]">
+                <span className="rounded-full bg-[#edf7df] px-3 py-1.5 text-[17px] font-bold text-[#527f13]">
                   {holidayScopeLabels[nextHoliday.scope]}
                 </span>
-                <span className="rounded-full bg-[#f1f3ef] px-2 py-1 text-[0.6rem] font-bold text-[#5f6c64]">
+                <span className="rounded-full bg-[#f1f3ef] px-3 py-1.5 text-[17px] font-bold text-[#5f6c64]">
                   {daysUntil === 0
                     ? "Hoje"
                     : daysUntil === 1
@@ -270,10 +270,10 @@ export function Notices({ today, holidays, loading, unavailable }: NoticesProps)
             </>
           ) : (
             <>
-              <h3 className="mb-1 text-sm font-bold text-[#153924]">
+              <h3 className="mb-1 text-[17px] font-bold text-[#153924]">
                 Calendário atualizado
               </h3>
-              <p className="text-[0.78rem] leading-relaxed text-[#617067]">
+              <p className="text-[17px] leading-relaxed text-[#617067]">
                 {unavailable
                   ? "Não foi possível consultar os feriados agora."
                   : "Não há outro feriado cadastrado neste período."}
@@ -286,7 +286,7 @@ export function Notices({ today, holidays, loading, unavailable }: NoticesProps)
         href={NEWS_URL}
         target="_blank"
         rel="noopener noreferrer"
-        className="mt-4 flex min-h-10 items-center justify-center gap-2 self-start rounded-[10px] bg-[linear-gradient(135deg,#78b313,#559806)] px-5 py-2 text-xs font-black text-white shadow-[0_8px_16px_rgba(82,145,6,0.2)] transition hover:brightness-105"
+        className="mt-4 flex min-h-[54px] items-center justify-center gap-2 self-start rounded-[10px] bg-[linear-gradient(135deg,#78b313,#559806)] px-6 py-3 text-[17px] font-black text-white shadow-[0_8px_16px_rgba(82,145,6,0.2)] transition hover:brightness-105"
       >
         Ver comunicados
         <ChevronRight className="size-5" />

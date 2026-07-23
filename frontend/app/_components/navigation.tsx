@@ -48,10 +48,10 @@ function HeaderClock() {
         className="min-w-[76px] text-right leading-none tabular-nums sm:min-w-[92px]"
         dateTime={currentTime?.toISOString()}
       >
-        <strong className="block text-sm font-black tracking-normal text-white sm:text-base">
+        <strong className="block text-[17px] font-black tracking-normal text-white">
           {time}
         </strong>
-        <span className="mt-1 block text-[0.58rem] font-semibold tracking-normal text-[#b9d59e] sm:text-[0.64rem]">
+        <span className="mt-1 block text-[17px] font-semibold tracking-normal text-[#b9d59e]">
           {date}
         </span>
       </time>
@@ -62,7 +62,7 @@ function HeaderClock() {
 // Cabeçalho com a marca e os links para sistemas externos do IDAM.
 export function Header({ onToggleMenu }: { onToggleMenu: () => void }) {
   return (
-    <header className="sticky top-0 z-50 h-[70px] overflow-hidden bg-[linear-gradient(105deg,#073821,#052f1f_55%,#004025)] text-white shadow-[0_8px_24px_rgba(3,42,27,0.16)] lg:h-[80px]">
+    <header className="sticky top-0 z-50 h-[78px] overflow-hidden bg-[linear-gradient(105deg,#073821,#052f1f_55%,#004025)] text-white shadow-[0_8px_24px_rgba(3,42,27,0.16)] lg:h-[92px]">
       <div className="relative mx-auto flex h-full max-w-[1920px] items-center gap-3 px-4 sm:px-5 xl:gap-6 xl:px-6">
         <button
           onClick={onToggleMenu}
@@ -85,8 +85,8 @@ export function Header({ onToggleMenu }: { onToggleMenu: () => void }) {
             className="h-9 w-16 shrink-0 object-contain sm:h-[42px] sm:w-[76px]"
           />
           <span className="min-w-0 leading-none">
-            <strong className="block text-[0.92rem] font-black">IDAM</strong>
-            <span className="mt-1 hidden text-[0.58rem] font-medium uppercase text-[#a9cc78] sm:block">
+            <strong className="block text-[17px] font-black">IDAM</strong>
+            <span className="mt-1 hidden text-[17px] font-medium uppercase text-[#a9cc78] sm:block">
               Intranet corporativa
             </span>
           </span>
@@ -102,7 +102,7 @@ export function Header({ onToggleMenu }: { onToggleMenu: () => void }) {
                 href={item.href}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex shrink-0 items-center gap-1.5 text-[0.66rem] font-bold uppercase text-white/90 transition hover:text-[#b5d90f] 2xl:text-[0.72rem]"
+                className="flex shrink-0 items-center gap-2 text-[17px] font-bold uppercase text-white/90 transition hover:text-[#b5d90f]"
               >
                 <Icon className="size-5" strokeWidth={1.8} />
                 {item.title}
@@ -140,7 +140,7 @@ function SidebarSection({
       }
     >
       <h2
-        className={`mb-4 border-b border-[#79a629] pb-2.5 text-[0.7rem] font-black uppercase text-[#5d9115] ${collapsed ? "lg:hidden" : ""}`}
+        className={`mb-4 border-b border-[#79a629] pb-2.5 text-[17px] font-black uppercase text-[#5d9115] ${collapsed ? "lg:hidden" : ""}`}
       >
         {title}
       </h2>
@@ -155,13 +155,13 @@ function SidebarSection({
               target="_blank"
               rel="noopener noreferrer"
               title={collapsed ? item.title : undefined}
-              className={`group flex min-h-11 items-center gap-3 rounded-[10px] px-1.5 py-2 text-[#17281d] transition hover:bg-[#f1f7ec] hover:text-[#5b930b] ${collapsed ? "lg:justify-center lg:px-0" : ""}`}
+              className={`group flex min-h-[58px] items-center gap-3 rounded-[10px] px-1.5 py-2.5 text-[#17281d] transition hover:bg-[#f1f7ec] hover:text-[#5b930b] ${collapsed ? "lg:justify-center lg:px-0" : ""}`}
             >
               <span className="flex size-8 shrink-0 items-center justify-center rounded-full text-[#073821] group-hover:bg-[#edf7df]">
                 <Icon className="size-6" strokeWidth={1.8} />
               </span>
               <span
-                className={`min-w-0 flex-1 text-[0.82rem] leading-snug ${collapsed ? "lg:hidden" : ""}`}
+                className={`min-w-0 flex-1 text-[17px] leading-snug ${collapsed ? "lg:hidden" : ""}`}
               >
                 {item.title}
               </span>
@@ -186,7 +186,7 @@ interface SidebarProps {
 export function Sidebar({ open, collapsed, onClose }: SidebarProps) {
   return (
     <aside
-      className={`fixed inset-y-0 left-0 z-[70] w-[280px] max-w-[86vw] overflow-y-auto border-r border-[#e4e8df] bg-white px-5 py-5 shadow-2xl transition-[width,transform,padding] duration-300 lg:static lg:z-auto lg:block lg:max-w-none lg:shrink-0 lg:translate-x-0 lg:py-5 lg:shadow-none ${collapsed ? "lg:w-[78px] lg:px-2.5" : "lg:w-[240px] lg:px-5"} ${open ? "translate-x-0" : "-translate-x-full"}`}
+      className={`fixed inset-y-0 left-0 z-[70] w-[320px] max-w-[90vw] overflow-y-auto border-r border-[#e4e8df] bg-white px-5 py-5 shadow-2xl transition-[width,transform,padding] duration-300 lg:static lg:z-auto lg:block lg:max-w-none lg:shrink-0 lg:translate-x-0 lg:py-5 lg:shadow-none ${collapsed ? "lg:w-[78px] lg:px-2.5" : "lg:w-[280px] lg:px-5"} ${open ? "translate-x-0" : "-translate-x-full"}`}
     >
       <div className="mb-6 flex items-center justify-between lg:hidden">
         <div className="flex items-center gap-2">
@@ -198,8 +198,8 @@ export function Sidebar({ open, collapsed, onClose }: SidebarProps) {
             className="h-10 w-[72px] object-contain"
           />
           <span className="leading-none">
-            <strong className="block text-sm">IDAM</strong>
-            <small className="text-[0.58rem] uppercase text-[#5d9115]">Intranet</small>
+            <strong className="block text-[17px]">IDAM</strong>
+            <small className="text-[17px] uppercase text-[#5d9115]">Intranet</small>
           </span>
         </div>
         <button
@@ -214,7 +214,7 @@ export function Sidebar({ open, collapsed, onClose }: SidebarProps) {
       <Link
         href="/"
         onClick={onClose}
-        className={`mb-7 flex h-[52px] w-full items-center gap-3 rounded-[12px] bg-[linear-gradient(135deg,#66a80f,#4f9208)] px-3 text-left text-base font-bold text-white shadow-[0_10px_20px_rgba(82,145,6,0.22)] ${collapsed ? "lg:justify-center lg:gap-0 lg:px-0" : ""}`}
+        className={`mb-7 flex h-[64px] w-full items-center gap-3 rounded-[12px] bg-[linear-gradient(135deg,#66a80f,#4f9208)] px-3 text-left text-[17px] font-bold text-white shadow-[0_10px_20px_rgba(82,145,6,0.22)] ${collapsed ? "lg:justify-center lg:gap-0 lg:px-0" : ""}`}
       >
         <span className="flex size-8 shrink-0 items-center justify-center rounded-[9px] bg-white text-[#4e9208] shadow-[0_3px_8px_rgba(36,88,4,0.18)]">
           <Home className="size-4.5" strokeWidth={2.2} />

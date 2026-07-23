@@ -104,9 +104,11 @@ export default function Page() {
           <div className="mx-auto grid w-full max-w-[1360px] grid-cols-1 gap-4">
             <div className="grid min-w-0 gap-4">
               <div className="grid min-w-0 grid-cols-1 items-stretch gap-4 xl:grid-cols-[minmax(0,2.35fr)_minmax(280px,0.95fr)]">
-                <div className="grid min-w-0 content-start gap-4">
+                <div className="grid min-w-0 content-start gap-4 xl:grid-rows-[auto_minmax(0,1fr)] xl:content-stretch xl:gap-5">
                   <QuickAccess />
-                  <BannerCarousel />
+                  <div className="flex min-w-0 items-center">
+                    <BannerCarousel />
+                  </div>
                 </div>
                 <DepartmentHub
                   selectedDept={selectedDept}

@@ -17,18 +17,18 @@ import { ShellCard } from "./shell-card";
 export function QuickAccess() {
   return (
     <ShellCard className="min-h-[148px] p-4 sm:p-5">
-      <div className="mb-4 flex items-center gap-3">
-        <h2 className="text-base font-black text-[#0a2d1e]">Acessos rápidos</h2>
+      <div className="mb-7 flex items-center gap-3">
+        <h2 className="text-[17px] font-black text-[#0a2d1e]">Acessos rápidos</h2>
         <span className="h-px w-9 bg-[#75a90d]" />
       </div>
-      <div className="grid grid-cols-4 gap-x-3 gap-y-4 sm:grid-cols-7 sm:gap-3 lg:gap-4">
+      <div className="flex flex-wrap justify-center gap-x-4 gap-y-4 sm:gap-5">
         {officeApps.map((app) => (
           <a
             key={app.title}
             href={app.href}
             target="_blank"
             rel="noopener noreferrer"
-            className="group text-center"
+            className="group w-[104px] text-center sm:w-[112px]"
           >
             <span className="mx-auto mb-2 flex aspect-square w-[50px] max-w-full items-center justify-center rounded-[11px] border border-[#e5eae0] bg-white shadow-[0_7px_16px_rgba(11,52,36,0.06)] transition group-hover:-translate-y-1 group-hover:border-[#9cc63a] sm:w-[56px]">
               <Image
@@ -39,7 +39,7 @@ export function QuickAccess() {
                 className={`${app.imageClassName ?? "size-7"} object-contain`}
               />
             </span>
-            <span className="block truncate text-[0.68rem] text-[#101b15] sm:text-[0.72rem]">
+            <span className="block text-[17px] leading-tight text-[#101b15]">
               {app.title}
             </span>
           </a>
@@ -65,8 +65,8 @@ export function DepartmentHub({
     <section className="h-full overflow-hidden rounded-[16px] border border-[#dfe7dc] bg-white shadow-[0_12px_30px_rgba(11,52,36,0.09)]">
       <div className="bg-[linear-gradient(135deg,#07391f,#004427)] p-4 text-white sm:p-5">
         <div className="mb-3 flex items-center justify-between border-b border-[#9bc914]/70 pb-3">
-          <h2 className="text-sm font-black">Áreas e sistemas</h2>
-          <span className="text-[0.62rem] font-bold uppercase text-white/65">
+          <h2 className="text-[17px] font-black">Áreas e sistemas</h2>
+          <span className="text-[17px] font-bold uppercase text-white/65">
             {selectedDept}
           </span>
         </div>
@@ -79,17 +79,17 @@ export function DepartmentHub({
                 key={department}
                 onClick={() => setSelectedDept(department)}
                 aria-pressed={selectedDept === department}
-                className={`flex min-h-[76px] flex-col items-center justify-center gap-1 rounded-[10px] px-1.5 text-center transition ${
+                className={`flex min-h-[84px] flex-col items-center justify-center gap-1 rounded-[10px] px-1.5 text-center transition ${
                   selectedDept === department
                     ? "bg-white/[0.11] ring-1 ring-[#9bc914]/70"
                     : "hover:bg-white/[0.06]"
                 }`}
               >
                 <span className="text-[#9bc914]">
-                  <Icon className="size-7" strokeWidth={1.8} />
+                  <Icon className="size-8" strokeWidth={1.8} />
                 </span>
-                <strong className="text-[0.66rem] text-[#b6dc25]">{department}</strong>
-                <span className="text-[0.65rem] leading-tight text-white/90">
+                <strong className="text-[17px] text-[#b6dc25]">{department}</strong>
+                <span className="text-[17px] leading-tight text-white/90">
                   {departmentMeta[department].short}
                 </span>
               </button>
@@ -100,11 +100,11 @@ export function DepartmentHub({
 
       <div className="p-4 sm:p-5">
         <div className="mb-3 flex items-center justify-between gap-3 border-b border-[#e4eae1] pb-3">
-          <h3 className="flex min-w-0 items-center gap-2.5 text-base font-black text-[#0a2d1e]">
-            <FileText className="size-5 shrink-0 text-[#0a6132]" />
+          <h3 className="flex min-w-0 items-center gap-2.5 text-[17px] font-black text-[#0a2d1e]">
+            <FileText className="size-6 shrink-0 text-[#0a6132]" />
             <span className="truncate">{departmentMeta[selectedDept].title}</span>
           </h3>
-          <span className="shrink-0 rounded-full bg-[#edf7df] px-2.5 py-1 text-[0.62rem] font-bold text-[#56880c]">
+          <span className="shrink-0 rounded-full bg-[#edf7df] px-3 py-1.5 text-[17px] font-bold text-[#56880c]">
             {links.length} {links.length === 1 ? "acesso" : "acessos"}
           </span>
         </div>
@@ -116,7 +116,7 @@ export function DepartmentHub({
               href={item.href}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex min-h-[40px] items-center gap-2 border-b border-[#edf0ea] px-1 py-1 text-[0.74rem] text-[#16251c] transition hover:bg-[#f7faf5] hover:text-[#5c940c]"
+              className="flex min-h-[44px] items-center gap-2 border-b border-[#edf0ea] px-1 py-1.5 text-[17px] text-[#16251c] transition hover:bg-[#f7faf5] hover:text-[#5c940c]"
             >
               <span className="min-w-0 flex-1 leading-tight">{item.title}</span>
               <ChevronRight className="size-4 shrink-0" />
@@ -141,7 +141,7 @@ export function BannerCarousel() {
   }, []);
 
   return (
-    <section className="relative aspect-video min-h-[180px] overflow-hidden rounded-[16px] bg-[#06351f] shadow-[0_14px_32px_rgba(11,52,36,0.14)] sm:min-h-0 xl:aspect-[2.32/1]">
+    <section className="relative aspect-video min-h-[180px] w-full overflow-hidden rounded-[16px] bg-[#06351f] shadow-[0_14px_32px_rgba(11,52,36,0.14)] sm:min-h-0 xl:aspect-[2.32/1]">
       <AnimatePresence mode="wait">
         <motion.div
           key={carouselSlides[active].src}

@@ -53,7 +53,6 @@ export const officeApps: OfficeApp[] = [
     href: "https://teams.microsoft.com",
     imageClassName: "size-9",
   },
-  { title: "Forms", img: "/image/formulario.png", href: "https://forms.office.com" },
 ];
 
 const RAMAIS_URL =
@@ -140,7 +139,7 @@ export const departmentLinks: Record<DepartmentKey, LinkItem[]> = {
 // Imagens institucionais usadas pelo carrossel da página inicial.
 export const carouselSlides = [
   {
-    src: "/Gov/banner-idam-sepror.png",
+    src: "/Gov/banner-idam-intranet.png",
     alt: "Banner IDAM Amazonas - Conectados com o que importa",
   },
   {
