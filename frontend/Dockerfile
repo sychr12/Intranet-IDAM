@@ -1,3 +1,4 @@
+# Etapa de compilação do frontend Next.js.
 FROM node:20-alpine AS build
 
 WORKDIR /app
@@ -8,6 +9,7 @@ RUN npm ci
 COPY . .
 RUN npm run build
 
+# Imagem de execução com os artefatos gerados no build.
 FROM node:20-alpine
 
 WORKDIR /app

@@ -1,148 +1,55 @@
-# 📘 Intranet IDAM
+# Intranet IDAM - Frontend
 
-Sistema interno desenvolvido para centralizar o acesso aos principais serviços, documentos, sistemas corporativos e informações institucionais do IDAM.
+Interface da intranet corporativa do IDAM, construída com Next.js, React e Tailwind CSS.
 
----
+## Execução com Docker
 
-# 🚀 Como Executar o Projeto
+Na raiz do projeto:
 
-## 📦 Instalar Dependências
-
-```bash
-npm install
+```powershell
+docker compose up --build
 ```
 
-## ▶️ Executar em Ambiente de Desenvolvimento
+A aplicação fica disponível em `http://localhost:3000`.
 
-```bash
+## Desenvolvimento local
+
+Dentro da pasta `frontend`:
+
+```powershell
+npm install
 npm run dev
 ```
 
-## 🏗️ Gerar Build de Produção
+Comandos de validação:
 
-```bash
+```powershell
+npm run lint
 npm run build
 ```
 
-## 🔥 Iniciar em Produção
+## Integração com o backend
 
-```bash
-npm start
+O frontend consulta `GET /backend-api/health`. O `next.config.ts` encaminha esse caminho para `GET /api/health` no Spring Boot.
+
+Os feriados exibidos no calendário e em Avisos são obtidos por `GET /api/holidays?year=AAAA`. Essa rota do Next.js combina os feriados nacionais da BrasilAPI com os feriados legais do Amazonas e de Manaus e mantém uma lista nacional de contingência para uso sem conexão externa.
+
+A variável `BACKEND_URL` define o endereço interno do backend:
+
+```env
+BACKEND_URL=http://localhost:8080
 ```
 
-## 🧹 Limpar Cache do Next.js (Opcional)
+No Docker Compose, o valor usado é `http://backend:8080`.
 
-```bash
-npm run clean
-```
+## Estrutura principal
 
----
-
-# 🏠 Tela Inicial – Acesso aos Serviços
-
-A página inicial oferece acesso rápido aos principais sistemas utilizados pelos colaboradores do IDAM. Cada botão funciona como um atalho direto para o respectivo serviço.
-
-## Serviços Disponíveis
-
-* AJURI
-* E-Compras
-* SEFAZ
-* SIGED
-* Site IDAM
-* Suporte de TI
-
----
-
-# 📄 Documentos – Aplicativos Microsoft 365
-
-A seção **Documentos** disponibiliza acesso rápido aos principais aplicativos corporativos da plataforma Microsoft 365:
-
-* Outlook
-* Word
-* Excel
-* PowerPoint
-* OneDrive
-* Teams
-* Forms
-* Portal Microsoft 365
-
----
-
-# 🏢 Departamentos – Sistemas Jurídicos e Administrativos
-
-Área destinada ao acesso dos sistemas utilizados pelos setores Jurídico (PJ), Recursos Humanos (RH) e Secretaria Geral de Controle (SGC).
-
-## Sistemas Disponíveis
-
-* Diário Oficial
-* DOE TCE
-* DEJT
-* Comunica PJe
-* e-SAJ
-* PROJUDI
-
----
-
-# 🔐 Dicas de Segurança da Informação
-
-Seção com orientações e boas práticas para utilização segura dos recursos tecnológicos da instituição.
-
-## Principais Recomendações
-
-* Prevenção contra malware;
-* Cuidados ao compartilhar informações;
-* Boas práticas para criação de senhas;
-* Procedimentos para abertura de chamados junto ao suporte de TI.
-
----
-
-# 📅 Calendário Institucional
-
-Disponibiliza informações sobre:
-
-* Feriados;
-* Eventos internos;
-* Prazos institucionais;
-* Datas importantes da organização.
-
----
-
-# ☎️ Contatos, E-mails e Ramais
-
-Acesso rápido a documentos contendo:
-
-* Lista de ramais atualizada;
-* E-mails institucionais;
-* Contatos internos dos setores.
-
----
-
-# 📚 Funcionalidades Disponíveis
-
-* Tela Inicial – Acesso aos Serviços
-* Aplicativos Microsoft 365
-* Sistemas Jurídicos e Administrativos
-* Dicas de Segurança da Informação
-* Calendário Institucional
-* Contatos, E-mails e Ramais
-
----
-
-# 🆕 Atualizações Recentes
-
-## Adicionado
-
-* Página **Criadores**, com informações detalhadas da equipe responsável pelo projeto.
-* Animações e melhorias visuais na página de criadores.
-* Declarações globais de tipos para módulos CSS e SCSS.
-
-## Alterado
-
-* Atualização da dependência `react-calendar` da versão `6.0.0` para `6.0.1`.
-* Inclusão da opção `ignoreDeprecations` no arquivo `tsconfig.json`.
-* Melhorias gerais na documentação do projeto.
-
-## Removido
-
-* Arquivo `docker-compose.yml`.
-* Integração da Rádio Agência Amazonas.
+- `app/page.tsx`: estado, integrações e composição da tela inicial.
+- `app/_components`: componentes organizados por responsabilidade visual.
+- `app/_data/home.ts`: links, atalhos e dados exibidos na tela inicial.
+- `app/_hooks/use-holidays.ts`: carregamento dos feriados no navegador.
+- `app/_lib/holidays.ts`: regras e normalização do calendário de feriados.
+- `app/api/holidays/route.ts`: integração em cache com a BrasilAPI.
+- `app/globals.css`: estilos globais e regras de acessibilidade.
+- `public/Gov`: logo e banners institucionais.
+- `public/image`: ícones dos aplicativos Microsoft 365.

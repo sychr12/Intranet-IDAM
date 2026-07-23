@@ -9,6 +9,7 @@ const compat = new FlatCompat({
   baseDirectory: __dirname,
 });
 
+// Regras oficiais do Next.js com exclusão de artefatos gerados pelo build.
 const eslintConfig = [
   ...compat.extends("next/core-web-vitals", "next/typescript"),
   {
