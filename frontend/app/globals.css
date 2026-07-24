@@ -1,0 +1,33 @@
+@import "tailwindcss";
+
+/* Variáveis de tema expostas às classes utilitárias do Tailwind. */
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+}
+
+/* Base visual e limites mínimos compartilhados por toda a aplicação. */
+html {
+  font-size: 17px;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  min-width: 320px;
+  overflow-x: hidden;
+  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+  line-height: 1.55;
+}
+
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Indicador de foco visível para navegação por teclado. */
+button:focus-visible,
+a:focus-visible {
+  outline: 3px solid #8bc600;
+  outline-offset: 3px;
+}
