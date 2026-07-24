@@ -1,7 +1,7 @@
 import { Globe, ShieldCheck } from "lucide-react";
 
-// Rodapé institucional e indicador visual da conexão com o backend.
-export function Footer({ backendOnline }: { backendOnline: boolean | null }) {
+// Rodapé institucional.
+export function Footer() {
   return (
     <footer className="border-t border-[#e4e8df] bg-white px-5 py-3 shadow-[0_-8px_22px_rgba(11,52,36,0.05)] sm:px-6">
       <div className="mx-auto grid max-w-[1860px] gap-4 text-[17px] text-[#111d16] md:grid-cols-2 md:items-center">
@@ -24,15 +24,6 @@ export function Footer({ backendOnline }: { backendOnline: boolean | null }) {
             rel="noopener noreferrer"
             className="flex min-w-0 items-center gap-2 break-all transition hover:text-[#56880c]"
           >
-            <span
-              className={`size-2.5 rounded-full ${
-                backendOnline === null
-                  ? "bg-[#c5ccbf]"
-                  : backendOnline
-                    ? "bg-[#73a900]"
-                    : "bg-red-500"
-              }`}
-            />
             https://intranet.idam.am.gov.br
           </a>
         </span>

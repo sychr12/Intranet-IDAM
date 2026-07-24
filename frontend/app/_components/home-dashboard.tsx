@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion, type Variants } from "framer-motion";
 import Image from "next/image";
 import { ChevronRight, FileText } from "lucide-react";
 import {
@@ -13,6 +13,18 @@ import {
 } from "../_data/home";
 import { ShellCard } from "./shell-card";
 
+const gridContainerVariants: Variants = {
+  hidden: {},
+  show: {
+    transition: { staggerChildren: 0.045, delayChildren: 0.05 },
+  },
+};
+
+const gridItemVariants: Variants = {
+  hidden: { opacity: 0, y: 10 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.32, ease: "easeOut" } },
+};
+
 // Atalhos para os aplicativos externos mais usados na rotina administrativa.
 export function QuickAccess() {
   return (
@@ -21,16 +33,24 @@ export function QuickAccess() {
         <h2 className="text-[17px] font-black text-[#0a2d1e]">Acessos rápidos</h2>
         <span className="h-px w-9 bg-[#75a90d]" />
       </div>
-      <div className="flex flex-wrap justify-center gap-x-4 gap-y-4 sm:gap-5">
+      <motion.div
+        variants={gridContainerVariants}
+        initial="hidden"
+        animate="show"
+        className="flex flex-wrap justify-center gap-x-4 gap-y-4 sm:gap-5"
+      >
         {officeApps.map((app) => (
-          <a
+          <motion.a
             key={app.title}
+            variants={gridItemVariants}
+            whileHover={{ y: -4 }}
+            whileTap={{ scale: 0.94 }}
             href={app.href}
             target="_blank"
             rel="noopener noreferrer"
-            className="group w-[104px] text-center sm:w-[112px]"
+            className="w-[104px] text-center sm:w-[112px]"
           >
-            <span className="mx-auto mb-2 flex aspect-square w-[50px] max-w-full items-center justify-center rounded-[11px] border border-[#e5eae0] bg-white shadow-[0_7px_16px_rgba(11,52,36,0.06)] transition group-hover:-translate-y-1 group-hover:border-[#9cc63a] sm:w-[56px]">
+            <span className="mx-auto mb-2 flex aspect-square w-[50px] max-w-full items-center justify-center rounded-[11px] border border-[#e5eae0] bg-white shadow-[0_7px_16px_rgba(11,52,36,0.06)] transition hover:border-[#9cc63a] sm:w-[56px]">
               <Image
                 src={app.img}
                 alt={app.title}
@@ -42,9 +62,9 @@ export function QuickAccess() {
             <span className="block text-[17px] leading-tight text-[#101b15]">
               {app.title}
             </span>
-          </a>
+          </motion.a>
         ))}
-      </div>
+      </motion.div>
     </ShellCard>
   );
 }
@@ -53,6 +73,18 @@ interface DepartmentHubProps {
   selectedDept: DepartmentKey;
   setSelectedDept: (department: DepartmentKey) => void;
 }
+
+const linkListVariants: Variants = {
+  hidden: {},
+  show: {
+    transition: { staggerChildren: 0.035 },
+  },
+};
+
+const linkItemVariants: Variants = {
+  hidden: { opacity: 0, x: -8 },
+  show: { opacity: 1, x: 0, transition: { duration: 0.22, ease: "easeOut" } },
+};
 
 // Abas de áreas internas e respectivos links para sistemas de terceiros.
 export function DepartmentHub({
@@ -73,23 +105,31 @@ export function DepartmentHub({
         <div className="grid grid-cols-3 gap-1.5">
           {(Object.keys(departmentMeta) as DepartmentKey[]).map((department) => {
             const Icon = departmentMeta[department].icon;
+            const isSelected = selectedDept === department;
 
             return (
               <button
                 key={department}
                 onClick={() => setSelectedDept(department)}
-                aria-pressed={selectedDept === department}
-                className={`flex min-h-[84px] flex-col items-center justify-center gap-1 rounded-[10px] px-1.5 text-center transition ${
-                  selectedDept === department
-                    ? "bg-white/[0.11] ring-1 ring-[#9bc914]/70"
-                    : "hover:bg-white/[0.06]"
+                aria-pressed={isSelected}
+                className={`relative flex min-h-[84px] flex-col items-center justify-center gap-1 overflow-hidden rounded-[10px] px-1.5 text-center transition ${
+                  isSelected ? "" : "hover:bg-white/[0.06]"
                 }`}
               >
-                <span className="text-[#9bc914]">
+                {isSelected && (
+                  <motion.span
+                    layoutId="deptActivePill"
+                    className="absolute inset-0 rounded-[10px] bg-white/[0.11] ring-1 ring-[#9bc914]/70"
+                    transition={{ type: "spring", stiffness: 380, damping: 32 }}
+                  />
+                )}
+                <span className="relative z-10 text-[#9bc914]">
                   <Icon className="size-8" strokeWidth={1.8} />
                 </span>
-                <strong className="text-[17px] text-[#b6dc25]">{department}</strong>
-                <span className="text-[17px] leading-tight text-white/90">
+                <strong className="relative z-10 text-[17px] text-[#b6dc25]">
+                  {department}
+                </strong>
+                <span className="relative z-10 text-[17px] leading-tight text-white/90">
                   {departmentMeta[department].short}
                 </span>
               </button>
@@ -109,20 +149,31 @@ export function DepartmentHub({
           </span>
         </div>
 
-        <div className="grid grid-cols-1 gap-x-5 sm:grid-cols-2 sm:divide-x sm:divide-[#e8ece4]">
-          {links.map((item) => (
-            <a
-              key={item.title}
-              href={item.href}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex min-h-[44px] items-center gap-2 border-b border-[#edf0ea] px-1 py-1.5 text-[17px] text-[#16251c] transition hover:bg-[#f7faf5] hover:text-[#5c940c]"
-            >
-              <span className="min-w-0 flex-1 leading-tight">{item.title}</span>
-              <ChevronRight className="size-4 shrink-0" />
-            </a>
-          ))}
-        </div>
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={selectedDept}
+            variants={linkListVariants}
+            initial="hidden"
+            animate="show"
+            exit={{ opacity: 0, transition: { duration: 0.12 } }}
+            className="grid grid-cols-1 gap-x-5 sm:grid-cols-2 sm:divide-x sm:divide-[#e8ece4]"
+          >
+            {links.map((item) => (
+              <motion.a
+                key={item.title}
+                variants={linkItemVariants}
+                whileHover={{ x: 3 }}
+                href={item.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex min-h-[44px] items-center gap-2 border-b border-[#edf0ea] px-1 py-1.5 text-[17px] text-[#16251c] transition-colors hover:bg-[#f7faf5] hover:text-[#5c940c]"
+              >
+                <span className="min-w-0 flex-1 leading-tight">{item.title}</span>
+                <ChevronRight className="size-4 shrink-0" />
+              </motion.a>
+            ))}
+          </motion.div>
+        </AnimatePresence>
       </div>
     </section>
   );
@@ -164,10 +215,14 @@ export function BannerCarousel() {
 
       <div className="absolute inset-x-0 bottom-3 z-20 flex justify-center gap-2 sm:bottom-4">
         {carouselSlides.map((slide, index) => (
-          <button
+          <motion.button
             key={slide.src}
             onClick={() => setActive(index)}
-            className={`size-2.5 rounded-full border border-white/80 shadow transition sm:size-3 ${active === index ? "bg-[#9bc914]" : "bg-white/90"}`}
+            whileHover={{ scale: 1.25 }}
+            whileTap={{ scale: 0.9 }}
+            animate={{ scale: active === index ? 1.2 : 1 }}
+            transition={{ duration: 0.2 }}
+            className={`size-2.5 rounded-full border border-white/80 shadow sm:size-3 ${active === index ? "bg-[#9bc914]" : "bg-white/90"}`}
             aria-label={`Exibir banner ${index + 1}`}
           />
         ))}

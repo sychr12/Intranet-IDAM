@@ -1,67 +1,65 @@
 # 📋 Intranet - Projeto
 
 ## 🎯 Visão Geral
-Aplicação Intranet com arquitetura monorepo contendo:
-- **Backend**: API REST em Java/Spring Boot
-- **Frontend**: Aplicação web em Next.js 15+ com TypeScript e Tailwind CSS
+
+A **Intranet** é uma aplicação web desenvolvida para centralizar informações e recursos internos da organização. O projeto é desenvolvido utilizando **Next.js 15+, React, TypeScript e Tailwind CSS**, com foco em uma interface moderna, responsiva e de fácil utilização.
+
+---
 
 ## 🏗️ Arquitetura
 
-### Backend (`/backend`)
-- **Stack**: Java, Spring Boot, Maven
-- **Build**: `mvnw` (Maven Wrapper)
-- **Dependências**: Gerenciadas via `pom.xml`
-- **Execução**: Docker Compose (`compose.yaml`)
-- **Estrutura**:
-  - `com.intranet.backend.BackendApplication` - Classe principal
-  - `src/main/java` - Código-fonte
-  - `src/test/java` - Testes
-  - `src/main/resources` - Configurações e assets estáticos
-
 ### Frontend (`/frontend`)
-- **Stack**: Next.js, React, TypeScript, Tailwind CSS
-- **Build Tool**: npm
-- **Dependências**: `package.json`
-- **Linting**: ESLint
-- **Estrutura**:
-  - `app/` - Pages e layouts (App Router)
-  - `app/criadores/` - Página de Criadores
-  - `app/calendar.css` - Estilos de calendário
-  - `public/` - Assets estáticos (Gov, icons, imagens)
-  - `api/` - Utilitários de API (ex: date.ts)
-  - Configurações: `next.config.ts`, `tsconfig.json`, `tailwind.config.js`
 
-## 📦 Principais Funcionalidades
-- Dashboard/Intranet
-- Calendário (visualizado em `calendar.css` e página principal)
-- Página de Criadores
-- Integração com API backend
+* **Stack:** Next.js 15+, React, TypeScript e Tailwind CSS
+* **Build Tool:** npm
+* **Linting:** ESLint
+* **Estrutura:**
 
-## 🔧 Stack Tecnológico
-| Componente | Tecnologia |
-|-----------|-----------|
-| Backend API | Java + Spring Boot |
-| Frontend | Next.js 15 + React + TypeScript |
-| Estilização | Tailwind CSS |
-| Gerenciamento de Estado | (a definir) |
-| Containerização | Docker Compose |
-| Versionamento | Git |
+  * `app/` — Páginas e layouts utilizando o App Router
+  * `app/criadores/` — Página de Criadores
+  * `app/calendar.css` — Estilos do calendário
+  * `public/` — Ícones, imagens e demais arquivos estáticos
+  * `api/` — Funções auxiliares e utilitários
+  * Configurações:
 
-## 🚀 Como Usar Este Prompt
-Cole o texto abaixo em conversas futuras para dar contexto ao projeto:
+    * `next.config.ts`
+    * `tsconfig.json`
+    * `tailwind.config.js`
 
 ---
-> Estou trabalhando em um projeto **Intranet** monorepo. 
-> - **Backend**: Java/Spring Boot em `/backend` com Maven
-> - **Frontend**: Next.js/TypeScript/Tailwind em `/frontend`
-> - Funcionalidades: Calendário, página de criadores, dashboard
-> - Estrutura: Backend em `/backend/src`, Frontend em `/frontend/app`
-> - Docker Compose para orquestração
+
+## 📦 Funcionalidades
+
+* Calendário
+* Página de Criadores
+* Interface responsiva
+* Navegação utilizando o App Router do Next.js
+
+---
+
+## 🔧 Stack Tecnológica
+
+| Componente  | Tecnologia                      |
+| ----------- | ------------------------------- |
+| Frontend    | Next.js 15 + React + TypeScript |
+| Estilização | Tailwind CSS                    |
+| Linting     | ESLint                          |
+
+---
+
+## 🎯 Objetivos
+
+* Desenvolver uma interface moderna e intuitiva.
+* Garantir uma experiência responsiva em diferentes dispositivos.
+* Organizar informações internas de forma prática.
+* Facilitar a navegação entre as páginas da aplicação.
+* Manter um código organizado e de fácil manutenção.
 
 ---
 
 ## 📝 Notas
-- Projeto em português
-- Layout responsivo com Tailwind CSS
-- API backend em Java (porta a confirmar)
-- Frontend moderno com Next.js App Router
+
+* Projeto desenvolvido em português.
+* Interface responsiva utilizando Tailwind CSS.
+* Estrutura baseada no App Router do Next.js.
+* Código organizado seguindo boas práticas de desenvolvimento.

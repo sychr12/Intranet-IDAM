@@ -1,9 +1,10 @@
-export type HolidayScope = "national" | "state" | "municipal";
+export type HolidayScope = "national" | "state" | "municipal" | "commemorative";
 
 export interface Holiday {
   date: string;
   name: string;
   scope: HolidayScope;
+  isDayOff: boolean;
 }
 
 export interface NationalHolidayInput {
@@ -22,6 +23,17 @@ const nationalFixedDates = [
   { month: 11, day: 15, name: "Proclamação da República" },
   { month: 11, day: 20, name: "Dia da Consciência Negra" },
   { month: 12, day: 25, name: "Natal" },
+];
+
+// Datas de profissão e comemorativas relevantes ao IDAM (não geram folga).
+const commemorativeFixedDates = [
+  { month: 6, day: 5, name: "Dia Mundial do Meio Ambiente" },
+  { month: 7, day: 12, name: "Dia do Engenheiro Florestal" },
+  { month: 9, day: 3, name: "Dia do Biólogo" },
+  { month: 9, day: 9, name: "Dia do Médico Veterinário" },
+  { month: 9, day: 21, name: "Dia da Árvore" },
+  { month: 10, day: 12, name: "Dia do Engenheiro Agrônomo" },
+  { month: 10, day: 28, name: "Dia do Servidor Público" },
 ];
 
 const locallyDefinedNames = new Set([
@@ -70,6 +82,7 @@ function nationalFallback(year: number): Holiday[] {
     date: fixedDate(year, month, day),
     name,
     scope: "national",
+    isDayOff: true,
   }));
 }
 
@@ -81,33 +94,48 @@ function amazonasAndManausHolidays(year: number): Holiday[] {
       date: toIsoDate(addDays(easter, -47)),
       name: "Carnaval",
       scope: "municipal",
+      isDayOff: true,
     },
     {
       date: toIsoDate(addDays(easter, -2)),
       name: "Paixão de Cristo",
       scope: "municipal",
+      isDayOff: true,
     },
     {
       date: toIsoDate(addDays(easter, 60)),
       name: "Corpus Christi",
       scope: "municipal",
+      isDayOff: true,
     },
     {
       date: fixedDate(year, 9, 5),
       name: "Elevação do Amazonas à Categoria de Província",
       scope: "state",
+      isDayOff: true,
     },
     {
       date: fixedDate(year, 10, 24),
       name: "Aniversário de Manaus",
       scope: "municipal",
+      isDayOff: true,
     },
     {
       date: fixedDate(year, 12, 8),
       name: "Nossa Senhora da Conceição",
       scope: "municipal",
+      isDayOff: true,
     },
   ];
+}
+
+function commemorativeDates(year: number): Holiday[] {
+  return commemorativeFixedDates.map(({ month, day, name }) => ({
+    date: fixedDate(year, month, day),
+    name,
+    scope: "commemorative",
+    isDayOff: false,
+  }));
 }
 
 const normalizeName = (name: string) =>
@@ -124,11 +152,19 @@ export function buildHolidayCalendar(
   const nationalSource = nationalHolidays.length
     ? nationalHolidays
         .filter(({ name }) => !locallyDefinedNames.has(normalizeName(name)))
-        .map<Holiday>(({ date, name }) => ({ date, name, scope: "national" }))
+        .map<Holiday>(({ date, name }) => ({
+          date,
+          name,
+          scope: "national",
+          isDayOff: true,
+        }))
     : nationalFallback(year);
 
   const byDate = new Map<string, Holiday>();
 
+  // Feriados reais (nacional/estadual/municipal) têm prioridade sobre datas comemorativas
+  // em caso de colisão no mesmo dia.
+  for (const holiday of commemorativeDates(year)) byDate.set(holiday.date, holiday);
   for (const holiday of nationalSource) byDate.set(holiday.date, holiday);
   for (const holiday of amazonasAndManausHolidays(year)) {
     byDate.set(holiday.date, holiday);
@@ -149,4 +185,5 @@ export const holidayScopeLabels: Record<HolidayScope, string> = {
   national: "Nacional",
   state: "Amazonas",
   municipal: "Manaus",
+  commemorative: "Data Comemorativa",
 };
