@@ -194,23 +194,26 @@ export function BannerCarousel() {
   return (
     <section className="relative aspect-video min-h-[180px] w-full overflow-hidden rounded-[16px] bg-[#06351f] shadow-[0_14px_32px_rgba(11,52,36,0.14)] sm:min-h-0 xl:aspect-[2.32/1]">
       <AnimatePresence mode="wait">
-        <motion.div
+        <motion.a
           key={carouselSlides[active].src}
+          href={carouselSlides[active].onClick}
+          target="_blank"
+          rel="noopener noreferrer"
           initial={{ opacity: 0, scale: 1.02 }}
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.99 }}
           transition={{ duration: 0.45 }}
-          className="absolute inset-0"
+          className="absolute inset-0 cursor-pointer"
         >
           <Image
             src={carouselSlides[active].src}
             alt={carouselSlides[active].alt}
             fill
             priority={active === 0}
-            sizes="(max-width: 640px) 100vw, (max-width: 1280px) 90vw, 70vw"
-            className="object-cover object-center"
+            sizes="100vw"
+            className="object-contain object-center"
           />
-        </motion.div>
+        </motion.a>
       </AnimatePresence>
 
       <div className="absolute inset-x-0 bottom-3 z-20 flex justify-center gap-2 sm:bottom-4">

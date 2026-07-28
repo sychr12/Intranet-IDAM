@@ -1,3 +1,4 @@
+import { link } from "fs";
 import type { LucideIcon } from "lucide-react";
 import {
   ClipboardList,
@@ -13,6 +14,13 @@ import {
   User,
   Users,
 } from "lucide-react";
+
+
+export interface CarouselSlide {
+  src: string;
+  alt: string;
+  onClick: string;
+}
 
 export type DepartmentKey = "PJ" | "RH" | "SGC";
 
@@ -69,22 +77,30 @@ export const quickFiles: LinkItem[] = [
   { title: "Lista de Contatos", icon: Users, href: CONTATOS_URL },
 ];
 
+
+
 // Materiais de orientação exibidos na barra lateral.
 export const securityTips: LinkItem[] = [
+  
   {
-    title: "O que é malware e como se proteger?",
+    title: "Proteja seus dispositivos contra malware",
     icon: ShieldCheck,
     href: "https://www.kaspersky.com.br/resource-center/preemptive-safety/what-is-malware-and-how-to-protect-against-it",
   },
   {
-    title: "Por que você não deve compartilhar suas senhas?",
+    title: "Nunca compartilhe suas senhas",
     icon: Lock,
     href: "https://digitalsecurityguide.eset.com/br/por-que-voce-nao-deve-compartilhar-suas-senhas",
   },
   {
-    title: "Como fazer um chamado",
+    title: "Guia rápido: como abrir um chamado",
     icon: Headphones,
     href: "https://office365prodam-my.sharepoint.com/:b:/g/personal/nti_idam_am_gov_br/EedyNcwHiHFIvvURrOX9Z-oBVP-bAnKVXMgpW1AndAFW6Q?e=RNoSew",
+  },
+    {
+    title: "Cuidado com e-mails suspeitos",
+    icon: Mail,
+    href: "https://www.showmetech.com.br/como-verificar-a-identidade-de-um-e-mail/",
   },
 ];
 
@@ -137,17 +153,43 @@ export const departmentLinks: Record<DepartmentKey, LinkItem[]> = {
 };
 
 // Imagens institucionais usadas pelo carrossel da página inicial.
-export const carouselSlides = [
+export const carouselSlides: CarouselSlide[] = [
   {
     src: "/Gov/banner-idam-intranet.png",
     alt: "Banner IDAM Amazonas - Conectados com o que importa",
+    onClick: "https://www.idam.am.gov.br/intranet/",
   },
   {
     src: "/Gov/banner-idam-producao.png",
-    alt: "Banner IDAM - Produção rural sustentável",
+    alt: "Produção Rural Sustentável",
+    onClick: "https://www.idam.am.gov.br/",
+  },
+  {
+    src: "/Gov/banner-malware.png",
+    alt: "Aprenda sobre malware e proteja seus dispositivos",
+    onClick:
+      "https://www.kaspersky.com.br/resource-center/preemptive-safety/what-is-malware-and-how-to-protect-against-it",
+  },
+  {
+    src: "/Gov/banner-senhas.png",
+    alt: "Por que você não deve compartilhar suas senhas",
+    onClick:
+      "https://digitalsecurityguide.eset.com/br/por-que-voce-nao-deve-compartilhar-suas-senhas",
+  },
+  {
+    src: "/Gov/banner-chamados-nti.png",
+    alt: "Manual de Abertura de Chamados - NTI",
+    onClick:
+      "https://office365prodam-my.sharepoint.com/:b:/g/personal/nti_idam_am_gov_br/EedyNcwHiHFIvvURrOX9Z-oBVP-bAnKVXMgpW1AndAFW6Q?e=RNoSew",
+  },
+
+  {
+    src: "/Gov/banner-email.png",
+    alt: "Como identificar e-mails suspeitos",
+    onClick:
+      "https://www.showmetech.com.br/como-verificar-a-identidade-de-um-e-mail/",
   },
 ];
-
 // Rótulos usados na montagem do calendário mensal.
 export const weekdays = ["SEG", "TER", "QUA", "QUI", "SEX", "SÁB", "DOM"];
 export const months = [

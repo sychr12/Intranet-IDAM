@@ -256,9 +256,24 @@ export function Sidebar({ open, collapsed, onClose }: SidebarProps) {
       </Link>
 
       <SidebarSection title="Arquivos e contatos" items={quickFiles} collapsed={collapsed} />
-      <div className={`mt-7 ${collapsed ? "lg:hidden" : ""}`}>
-        <SidebarSection title="Dicas de segurança" items={securityTips} boxed />
-      </div>
+      <motion.div
+        className={`mt-7 ${collapsed ? "lg:hidden" : ""}`}
+        animate={{
+          scale: [1, 1.02, 1],
+          y: [0, -2, 0],
+        }}
+        transition={{
+          duration: 2,
+          repeat: Infinity,
+          ease: "easeInOut",
+        }}
+      >
+        <SidebarSection
+          title="Dicas de Segurança"
+          items={securityTips}
+          boxed
+        />
+      </motion.div>
     </aside>
   );
 }
