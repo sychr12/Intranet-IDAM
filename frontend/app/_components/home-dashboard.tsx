@@ -9,9 +9,9 @@ import {
   departmentLinks,
   departmentMeta,
   officeApps,
+  quickAccessLinks,
   type DepartmentKey,
 } from "../_data/home";
-import { ShellCard } from "./shell-card";
 
 const gridContainerVariants: Variants = {
   hidden: {},
@@ -28,44 +28,75 @@ const gridItemVariants: Variants = {
 // Atalhos para os aplicativos externos mais usados na rotina administrativa.
 export function QuickAccess() {
   return (
-    <ShellCard className="min-h-[148px] p-4 sm:p-5">
-      <div className="mb-7 flex items-center gap-3">
-        <h2 className="text-[17px] font-black text-[#0a2d1e]">Acessos rápidos</h2>
-        <span className="h-px w-9 bg-[#75a90d]" />
+    <section className="overflow-hidden rounded-[16px] border border-[#e3e9df] bg-white p-4 shadow-[0_12px_30px_rgba(11,52,36,0.07)] sm:p-5">
+      <div className="mb-4 flex items-end justify-between gap-4 border-b border-[#e7ece7] pb-3">
+        <div>
+          <h2 className="text-[17px] font-black tracking-[-0.01em] text-[#0a2d1e]">
+            Acessos rápidos
+          </h2>
+          <p className="mt-0.5 text-[12px] font-medium text-[#638070]">
+            Sistemas institucionais
+          </p>
+        </div>
+        <span className="h-1 w-12 rounded-full bg-[#9bc914]" aria-hidden="true" />
       </div>
       <motion.div
         variants={gridContainerVariants}
         initial="hidden"
         animate="show"
-        className="flex flex-wrap justify-center gap-x-4 gap-y-4 sm:gap-5"
+        className="grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-3 xl:grid-cols-7"
       >
-        {officeApps.map((app) => (
-          <motion.a
-            key={app.title}
-            variants={gridItemVariants}
-            whileHover={{ y: -4 }}
-            whileTap={{ scale: 0.94 }}
-            href={app.href}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="w-[104px] text-center sm:w-[112px]"
-          >
-            <span className="mx-auto mb-2 flex aspect-square w-[50px] max-w-full items-center justify-center rounded-[11px] border border-[#e5eae0] bg-white shadow-[0_7px_16px_rgba(11,52,36,0.06)] transition hover:border-[#9cc63a] sm:w-[56px]">
+        {quickAccessLinks.map((app) => {
+          const Icon = app.icon;
+
+          return (
+            <motion.a
+              key={app.title}
+              variants={gridItemVariants}
+              whileHover={{ y: -3 }}
+              whileTap={{ scale: 0.94 }}
+              href={app.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group flex min-h-[94px] flex-col items-center justify-center gap-2.5 rounded-[12px] border border-white/10 bg-[#073821] px-2 text-center text-white shadow-[0_4px_8px_rgba(8,48,35,0.16)] transition duration-200 hover:-translate-y-0.5 hover:bg-[#0a4b2b] hover:shadow-[0_8px_14px_rgba(8,48,35,0.2)]"
+            >
+              <span className="flex size-8 items-center justify-center rounded-full bg-white/10 text-[#b6dc25] transition group-hover:bg-white/15">
+                <Icon className="size-5" strokeWidth={2} aria-hidden="true" />
+              </span>
+              <span className="text-[12px] font-extrabold tracking-[0.015em] leading-none">{app.title}</span>
+            </motion.a>
+          );
+        })}
+      </motion.div>
+
+      <div className="mt-4 border-t border-[#e7ece7] pt-3.5">
+        <p className="mb-2.5 text-[11px] font-bold uppercase tracking-[0.09em] text-[#5d9115]">
+          Aplicativos Microsoft 365
+        </p>
+        <div className="grid grid-cols-3 gap-2 sm:grid-cols-6 sm:gap-2.5">
+          {officeApps.map((app) => (
+            <motion.a
+              key={app.title}
+              whileHover={{ y: -2 }}
+              whileTap={{ scale: 0.96 }}
+              href={app.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex min-h-[54px] items-center justify-center gap-2 rounded-[9px] border border-[#e1e8e1] bg-[#fafcf9] px-1.5 text-[#173425] transition hover:border-[#9bc914] hover:bg-[#edf7df]"
+            >
               <Image
                 src={app.img}
-                alt={app.title}
-                width={36}
-                height={36}
-                className={`${app.imageClassName ?? "size-7"} object-contain`}
+                alt=""
+                width={23}
+                height={23}
+                className={`${app.imageClassName ?? "size-5"} object-contain`}
               />
-            </span>
-            <span className="block text-[17px] leading-tight text-[#101b15]">
-              {app.title}
-            </span>
-          </motion.a>
-        ))}
-      </motion.div>
-    </ShellCard>
+              <span className="text-[11px] font-semibold leading-none">{app.title}</span>
+            </motion.a>
+          ))}
+        </div>
+      </div>
+    </section>
   );
 }
 

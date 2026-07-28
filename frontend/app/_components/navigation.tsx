@@ -6,7 +6,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { ChevronLeft, ChevronRight, Clock3, Home, Menu } from "lucide-react";
 import {
-  headerLinks,
   quickFiles,
   securityTips,
   type LinkItem,
@@ -39,7 +38,7 @@ function HeaderClock() {
 
   return (
     <div
-      className="ml-auto flex shrink-0 items-center gap-2.5 border-l border-white/15 pl-3 sm:gap-3 sm:pl-4"
+      className="ml-auto flex shrink-0 items-center gap-2.5 rounded-[12px] bg-white/[0.07] px-3 py-2 sm:gap-3 sm:px-4"
       aria-label="Data e hora atuais"
     >
       <span className="hidden size-9 items-center justify-center rounded-full bg-[#6da711] text-white shadow-[0_5px_14px_rgba(0,0,0,0.18)] sm:flex">
@@ -67,14 +66,14 @@ export function Header({ onToggleMenu }: { onToggleMenu: () => void }) {
       initial={{ y: -24, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.35, ease: "easeOut" }}
-      className="sticky top-0 z-50 h-[78px] overflow-hidden bg-[linear-gradient(105deg,#073821,#052f1f_55%,#004025)] text-white shadow-[0_8px_24px_rgba(3,42,27,0.16)] lg:h-[92px]"
+      className="sticky top-0 z-50 h-[70px] overflow-hidden border-b border-white/10 bg-[linear-gradient(105deg,#073821,#052f1f_55%,#004025)] text-white shadow-[0_8px_24px_rgba(3,42,27,0.16)] lg:h-[78px]"
     >
       <div className="relative mx-auto flex h-full max-w-[1920px] items-center gap-3 px-4 sm:px-5 xl:gap-6 xl:px-6">
         <motion.button
           onClick={onToggleMenu}
           whileHover={{ scale: 1.08 }}
           whileTap={{ scale: 0.92 }}
-          className="flex size-9 shrink-0 items-center justify-center rounded-full border border-white/30 text-white/95 transition-colors hover:bg-white/10 lg:border-transparent"
+          className="flex size-10 shrink-0 items-center justify-center rounded-[11px] border border-white/20 text-white/95 transition-colors hover:bg-white/10"
           aria-label="Alternar menu"
         >
           <Menu className="size-5.5" />
@@ -82,7 +81,7 @@ export function Header({ onToggleMenu }: { onToggleMenu: () => void }) {
 
         <Link
           href="/"
-          className="flex h-[56px] w-[120px] shrink-0 items-center gap-2 overflow-hidden sm:w-[220px]"
+          className="flex h-[56px] w-[120px] shrink-0 items-center gap-2 overflow-hidden sm:w-[250px]"
         >
           <Image
             src="/Gov/logo-idam.png"
@@ -92,36 +91,13 @@ export function Header({ onToggleMenu }: { onToggleMenu: () => void }) {
             priority
             className="h-9 w-16 shrink-0 object-contain sm:h-[42px] sm:w-[76px]"
           />
-          <span className="min-w-0 leading-none">
+          <span className="min-w-0 border-l border-white/20 pl-2.5 leading-none">
             <strong className="block text-[17px] font-black">IDAM</strong>
             <span className="mt-1 hidden text-[17px] font-medium uppercase text-[#a9cc78] sm:block">
               Intranet corporativa
             </span>
           </span>
         </Link>
-
-        <nav className="hidden min-w-0 flex-1 items-center justify-center gap-3 xl:absolute xl:left-1/2 xl:flex xl:-translate-x-1/2 2xl:gap-6">
-          {headerLinks.map((item, index) => {
-            const Icon = item.icon;
-
-            return (
-              <motion.a
-                key={item.title}
-                initial={{ opacity: 0, y: -8 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3, delay: 0.08 + index * 0.04 }}
-                whileHover={{ y: -1 }}
-                href={item.href}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex shrink-0 items-center gap-2 text-[17px] font-bold uppercase text-white/90 transition-colors hover:text-[#b5d90f]"
-              >
-                <Icon className="size-5" strokeWidth={1.8} />
-                {item.title}
-              </motion.a>
-            );
-          })}
-        </nav>
 
         <HeaderClock />
       </div>

@@ -1,10 +1,12 @@
-import { link } from "fs";
 import type { LucideIcon } from "lucide-react";
 import {
+  BarChart3,
   ClipboardList,
   FileText,
+  FolderOpen,
   Globe,
   Headphones,
+  Layers,
   Lock,
   Mail,
   Newspaper,
@@ -13,6 +15,7 @@ import {
   ShieldCheck,
   User,
   Users,
+  Wrench,
 } from "lucide-react";
 
 
@@ -48,7 +51,18 @@ export const headerLinks: LinkItem[] = [
   { title: "Suporte", icon: Headphones, href: "https://nti.idam.am.gov.br/front/helpdesk.public.php" },
 ];
 
-// Aplicativos do Microsoft 365 exibidos como acessos rápidos.
+// Sistemas institucionais exibidos como acessos rápidos.
+export const quickAccessLinks: LinkItem[] = [
+  { title: "AJURI", icon: Layers, href: "https://ajuri.amazonas.am.gov.br/" },
+  { title: "E-COMPRAS", icon: BarChart3, href: "https://www.e-compras.am.gov.br/" },
+  { title: "EMAIL", icon: Mail, href: "https://outlook.office365.com/mail/" },
+  { title: "SEFAZ", icon: Globe, href: "https://www.sefaz.am.gov.br/" },
+  { title: "SIGED", icon: FolderOpen, href: "https://sistemas.sefaz.am.gov.br/siged/login" },
+  { title: "SITE IDAM", icon: Globe, href: "https://www.idam.am.gov.br/" },
+  { title: "SUPORTE TI", icon: Wrench, href: "https://nti.idam.am.gov.br/front/helpdesk.public.php" },
+];
+
+// Aplicativos Microsoft 365 disponíveis para acesso rápido.
 export const officeApps: OfficeApp[] = [
   { title: "Outlook", img: "/image/outlook.png", href: "https://outlook.office365.com/mail/" },
   { title: "Word", img: "/image/word.png", href: "https://www.office.com/launch/word" },
@@ -59,7 +73,7 @@ export const officeApps: OfficeApp[] = [
     title: "Teams",
     img: "/image/teams.png",
     href: "https://teams.microsoft.com",
-    imageClassName: "size-9",
+    imageClassName: "size-8",
   },
 ];
 

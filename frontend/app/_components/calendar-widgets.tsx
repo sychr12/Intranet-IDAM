@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion, type Variants } from "framer-motion";
-import { CalendarDays, ChevronLeft, ChevronRight } from "lucide-react";
+import { CalendarDays, ChevronLeft, ChevronRight, MessageCircleHeart, RefreshCw } from "lucide-react";
 import { NEWS_URL, months, weekdays } from "../_data/home";
 import {
   holidayScopeLabels,
@@ -92,10 +92,15 @@ export function MiniCalendar({
     });
   }, [cursor]);
 
-  const holidaysByDate = useMemo(
-    () => new Map(holidays.map((holiday) => [holiday.date, holiday])),
-    [holidays],
-  );
+  const holidaysByDate = useMemo(() => {
+    const grouped = new Map<string, Holiday[]>();
+    for (const holiday of holidays) {
+      const entries = grouped.get(holiday.date) ?? [];
+      entries.push(holiday);
+      grouped.set(holiday.date, entries);
+    }
+    return grouped;
+  }, [holidays]);
 
   const isToday = (date: Date) =>
     today.getDate() === date.getDate() &&
@@ -236,7 +241,11 @@ export function MiniCalendar({
                 className="grid grid-cols-7 gap-x-1 gap-y-1.5 px-2 py-2.5 text-center"
               >
                 {calendarDays.map(({ date, day, isCurrentMonth }, index) => {
-                  const holiday = holidaysByDate.get(toHolidayDateKey(date));
+                  const holidaysOnDate = holidaysByDate.get(toHolidayDateKey(date)) ?? [];
+                  const holiday = holidaysOnDate[0];
+                  const hasCommemorative = holidaysOnDate.some(
+                    (item) => item.scope === "commemorative",
+                  );
                   const todayDate = isToday(date);
                   const rowIndex = Math.floor(index / 7);
                   const tooltipBelow = rowIndex < 5;
@@ -255,14 +264,18 @@ export function MiniCalendar({
                       tabIndex={holiday ? 0 : undefined}
                       aria-label={
                         holiday
-                          ? `${holiday.name} - ${holidayScopeLabels[holiday.scope]}`
+                          ? holidaysOnDate
+                              .map((item) => `${item.name} - ${holidayScopeLabels[item.scope]}`)
+                              .join("; ")
                           : undefined
                       }
                       className={`group relative z-0 mx-auto flex size-9 items-center justify-center rounded-full text-[17px] outline-none hover:z-30 focus-visible:z-30 sm:size-10 ${
                         todayDate
                           ? "bg-[#0c711f] font-black text-white ring-4 ring-[#dff0cf] shadow-[0_5px_12px_rgba(12,113,31,0.24)]"
                           : holiday && isCurrentMonth
-                            ? "bg-[#fff5cf] font-black text-[#6c5100] ring-1 ring-[#e7c963] hover:bg-[#ffedaa]"
+                            ? hasCommemorative
+                              ? "bg-[#e8f5d8] font-black text-[#3e6811] ring-1 ring-[#b6d88b] hover:bg-[#dcf0c5]"
+                              : "bg-[#fff5cf] font-black text-[#6c5100] ring-1 ring-[#e7c963] hover:bg-[#ffedaa]"
                             : isCurrentMonth
                               ? index % 7 > 4
                                 ? "text-[#466b31] hover:bg-[#eaf5de]"
@@ -282,7 +295,7 @@ export function MiniCalendar({
                       {holiday && (
                         <>
                           <span
-                            className={`absolute bottom-0.5 size-1 rounded-full ${todayDate ? "bg-white" : "bg-[#d09900]"}`}
+                            className={`absolute bottom-0.5 size-1 rounded-full ${todayDate ? "bg-white" : hasCommemorative ? "bg-[#5d9115]" : "bg-[#d09900]"}`}
                             aria-hidden="true"
                           />
                           <span
@@ -297,10 +310,14 @@ export function MiniCalendar({
                                   : "right-0"
                             }`}
                           >
-                            {holiday.name}
-                            <span className="block text-[11px] font-normal text-[#cfe4c9]">
-                              {holidayScopeLabels[holiday.scope]}
-                            </span>
+                            {holidaysOnDate.map((item) => (
+                              <span key={`${item.scope}-${item.name}`} className="block first:font-semibold">
+                                {item.name}
+                                <span className="ml-1 text-[11px] font-normal text-[#cfe4c9]">
+                                  {holidayScopeLabels[item.scope]}
+                                </span>
+                              </span>
+                            ))}
                             <span
                               className={`absolute border-4 border-transparent ${
                                 tooltipBelow
@@ -334,6 +351,10 @@ export function MiniCalendar({
             <span className="size-4 rounded-full bg-[#e0b226] ring-2 ring-[#fff2bd]" />
             Feriado
           </span>
+          <span className="flex items-center gap-1.5">
+            <span className="size-4 rounded-full bg-[#7db23b] ring-2 ring-[#e5f2d4]" />
+            Data comemorativa
+          </span>
           <AnimatePresence>
             {holidaysLoading && (
               <motion.span
@@ -357,6 +378,99 @@ interface NoticesProps {
   holidays: Holiday[];
   loading: boolean;
   unavailable: boolean;
+}
+
+interface DailyMessageResponse {
+  message: string;
+}
+
+function DailyMessage() {
+  const [message, setMessage] = useState<string>();
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const fetchMessage = async (signal?: AbortSignal) => {
+    try {
+      const response = await fetch(`/api/daily-message?t=${Date.now()}`, {
+        signal,
+        cache: "no-store",
+      });
+      if (!response.ok) throw new Error("Mensagem indisponível");
+      const payload = (await response.json()) as DailyMessageResponse;
+      setMessage(payload.message);
+    } catch (error) {
+      if (error instanceof DOMException && error.name === "AbortError") return;
+      setMessage("Que o seu dia seja de boas ideias, parceria e resultados positivos.");
+    }
+  };
+
+  useEffect(() => {
+    const controller = new AbortController();
+    fetchMessage(controller.signal);
+    return () => controller.abort();
+  }, []);
+
+  const handleRandomize = async () => {
+    if (isRefreshing) return;
+    setIsRefreshing(true);
+    await fetchMessage();
+    setIsRefreshing(false);
+  };
+
+  return (
+    <div className="mb-4 overflow-hidden rounded-[12px] border border-[#d9e9cf] bg-[linear-gradient(135deg,#f3f9ee,#edf6e6)] p-3.5 shadow-[0_4px_12px_rgba(29,80,39,0.05)]">
+      <div className="flex gap-3">
+        <span className="flex size-9 shrink-0 items-center justify-center rounded-[10px] bg-[#0b3a22] text-[#b6dc25] shadow-[0_4px_9px_rgba(11,58,34,0.18)]">
+          <MessageCircleHeart className="size-5" />
+        </span>
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center justify-between gap-2">
+            <p className="text-[11px] font-black uppercase tracking-[0.08em] text-[#5d9115]">
+              Mensagem do dia
+            </p>
+            <motion.button
+              type="button"
+              onClick={handleRandomize}
+              disabled={isRefreshing}
+              whileHover={!isRefreshing ? { scale: 1.08 } : undefined}
+              whileTap={!isRefreshing ? { scale: 0.9 } : undefined}
+              aria-label="Sortear nova mensagem"
+              title="Sortear nova mensagem"
+              className="flex size-6 shrink-0 items-center justify-center rounded-full text-[#5d9115] transition hover:bg-[#dcebc8] disabled:cursor-wait disabled:opacity-60"
+            >
+              <motion.span
+                animate={isRefreshing ? { rotate: 360 } : { rotate: 0 }}
+                transition={
+                  isRefreshing
+                    ? { duration: 0.7, repeat: Infinity, ease: "linear" }
+                    : { duration: 0.2 }
+                }
+                className="flex"
+              >
+                <RefreshCw className="size-3.5" />
+              </motion.span>
+            </motion.button>
+          </div>
+
+          {message ? (
+            <AnimatePresence mode="wait">
+              <motion.p
+                key={message}
+                initial={{ opacity: 0, y: 4 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -4 }}
+                transition={{ duration: 0.2 }}
+                className="mt-0.5 text-[13px] font-semibold leading-snug text-[#274b37]"
+              >
+                {message}
+              </motion.p>
+            </AnimatePresence>
+          ) : (
+            <span className="mt-2 block h-3 w-full animate-pulse rounded bg-[#dcebd4]" />
+          )}
+        </div>
+      </div>
+    </div>
+  );
 }
 
 // Resumo do próximo feriado, da próxima data comemorativa e acesso às notícias institucionais.
@@ -383,10 +497,17 @@ export function Notices({ today, holidays, loading, unavailable }: NoticesProps)
     });
 
   return (
-    <ShellCard className="flex min-h-[236px] flex-col p-4 sm:p-5">
+    <ShellCard className="flex min-h-[252px] flex-col p-4 sm:p-5">
       <div className="mb-3 flex items-center justify-between border-b border-[#e7ece4] pb-3">
-        <h2 className="text-[17px] font-black text-[#0a2d1e]">Avisos</h2>
+        <h2 className="flex items-center gap-2 text-[17px] font-black text-[#0a2d1e]">
+          <span className="flex size-8 items-center justify-center rounded-[9px] bg-[#e8f5d8] text-[#4d7f10]">
+            <CalendarDays className="size-4.5" />
+          </span>
+          Agenda e avisos
+        </h2>
       </div>
+
+      <DailyMessage />
 
       {loading ? (
         <div className="flex-1 space-y-4">
