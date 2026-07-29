@@ -13,11 +13,26 @@ const dailyMessages = [
   "Hoje é uma nova oportunidade para aprender, colaborar e evoluir.",
   "Planeje com calma, execute com atenção e celebre o que foi bem feito.",
   "O serviço público ganha força quando cada pessoa contribui com responsabilidade.",
+  "Resiliência é continuar trabalhando com foco mesmo quando os resultados demoram a aparecer.",
+  "A transparência nas ações cria mais confiança e mais eficiência no trabalho coletivo.",
+  "Peça ajuda sempre que precisar; a colaboração torna o trabalho mais leve e produtivo.",
+  "Valorize a diversidade de opiniões, pois elas ajudam a encontrar soluções mais completas.",
+  "Permita-se pausar e reavaliar prioridades para trabalhar com mais clareza.",
+  "O cuidado com os detalhes faz a diferença em cada serviço prestado à sociedade.",
 ] as const;
+
+export function getDailyMessageIndex(date = new Date()) {
+  const dateKey = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
+  return [...dateKey].reduce((total, character) => total + character.charCodeAt(0), 0) % dailyMessages.length;
+}
+
+export function getDailyMessageByIndex(index: number) {
+  return dailyMessages[index % dailyMessages.length];
+}
 
 export function getDailyMessage(date = new Date()) {
   const dateKey = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
-  const index = [...dateKey].reduce((total, character) => total + character.charCodeAt(0), 0) % dailyMessages.length;
+  const index = getDailyMessageIndex(date);
 
-  return { date: dateKey, message: dailyMessages[index] };
+  return { date: dateKey, message: getDailyMessageByIndex(index) };
 }

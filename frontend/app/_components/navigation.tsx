@@ -11,6 +11,30 @@ import {
   type LinkItem,
 } from "../_data/home";
 
+function formatHeaderDateTime(date: Date | null) {
+  if (!date) {
+    return {
+      time: "--:--:--",
+      date: "--/--/----",
+      dateTime: undefined,
+    };
+  }
+
+  return {
+    time: date.toLocaleTimeString("pt-BR", {
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+    }),
+    date: date.toLocaleDateString("pt-BR", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    }),
+    dateTime: date.toISOString(),
+  };
+}
+
 // Relógio em tempo real exibido no canto direito do cabeçalho.
 function HeaderClock() {
   const [currentTime, setCurrentTime] = useState<Date | null>(null);
@@ -23,18 +47,7 @@ function HeaderClock() {
     return () => window.clearInterval(timer);
   }, []);
 
-  const time =
-    currentTime?.toLocaleTimeString("pt-BR", {
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
-    }) ?? "--:--:--";
-  const date =
-    currentTime?.toLocaleDateString("pt-BR", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-    }) ?? "--/--/----";
+  const { time, date, dateTime } = formatHeaderDateTime(currentTime);
 
   return (
     <div
@@ -110,6 +123,7 @@ interface SidebarSectionProps {
   items: LinkItem[];
   boxed?: boolean;
   collapsed?: boolean;
+  secretAction?: () => void;
 }
 
 const sectionListVariants: Variants = {
@@ -130,6 +144,7 @@ function SidebarSection({
   items,
   boxed = false,
   collapsed = false,
+  secretAction,
 }: SidebarSectionProps) {
   return (
     <div
@@ -140,7 +155,8 @@ function SidebarSection({
       }
     >
       <h2
-        className={`mb-4 border-b border-[#79a629] pb-2.5 text-[17px] font-black uppercase text-[#5d9115] ${collapsed ? "lg:hidden" : ""}`}
+        onClick={secretAction}
+        className={`mb-4 cursor-pointer border-b border-[#79a629] pb-2.5 text-[17px] font-black uppercase text-[#5d9115] ${collapsed ? "lg:hidden" : ""}`}
       >
         {title}
       </h2>
@@ -189,14 +205,28 @@ interface SidebarProps {
   onClose: () => void;
 }
 
+
 // Navegação lateral responsiva: gaveta no celular e versão compacta no desktop.
 export function Sidebar({ open, collapsed, onClose }: SidebarProps) {
+  const [showCreators, setShowCreators] = useState(false);
+  const [secretClicks, setSecretClicks] = useState(0);
+
+  const revealCreators = () => {
+    setSecretClicks((current) => {
+      const next = current + 1;
+      if (next >= 7) {
+        setShowCreators(true);
+      }
+      return next;
+    });
+  };
+
   return (
     <aside
-      className={`fixed inset-y-0 left-0 z-[70] w-[320px] max-w-[90vw] overflow-y-auto border-r border-[#e4e8df] bg-white px-5 py-5 shadow-2xl transition-[width,transform,padding] duration-300 lg:static lg:z-auto lg:block lg:max-w-none lg:shrink-0 lg:translate-x-0 lg:py-5 lg:shadow-none ${collapsed ? "lg:w-[78px] lg:px-2.5" : "lg:w-[280px] lg:px-5"} ${open ? "translate-x-0" : "-translate-x-full"}`}
+      className={`fixed inset-y-0 left-0 z-[70] w-[88vw] max-w-[340px] overflow-y-auto border-r border-[#e4e8df] bg-white px-3.5 py-5 shadow-2xl transition-[width,transform,padding] duration-300 lg:static lg:z-auto lg:block lg:max-w-none lg:shrink-0 lg:translate-x-0 lg:py-5 lg:shadow-none ${collapsed ? "lg:w-[78px] lg:px-2.5" : "lg:w-[280px] lg:px-3.5"} ${open ? "translate-x-0" : "-translate-x-full"}`}
     >
       <div className="mb-6 flex items-center justify-between lg:hidden">
-        <div className="flex items-center gap-2">
+        <div className="relative flex items-center gap-2">
           <Image
             src="/Gov/logo-idam.png"
             alt="IDAM Amazonas"
@@ -208,6 +238,12 @@ export function Sidebar({ open, collapsed, onClose }: SidebarProps) {
             <strong className="block text-[17px]">IDAM</strong>
             <small className="text-[17px] uppercase text-[#5d9115]">Intranet</small>
           </span>
+          <button
+            type="button"
+            onClick={revealCreators}
+            aria-label="Segredo dos criadores"
+            className="absolute inset-0 opacity-0"
+          />
         </div>
         <motion.button
           onClick={onClose}
@@ -220,18 +256,22 @@ export function Sidebar({ open, collapsed, onClose }: SidebarProps) {
         </motion.button>
       </div>
 
-      <Link
-        href="/"
-        onClick={onClose}
-        className={`mb-7 flex h-[64px] w-full items-center gap-3 rounded-[12px] bg-[linear-gradient(135deg,#66a80f,#4f9208)] px-3 text-left text-[17px] font-bold text-white shadow-[0_10px_20px_rgba(82,145,6,0.22)] transition-transform hover:-translate-y-0.5 ${collapsed ? "lg:justify-center lg:gap-0 lg:px-0" : ""}`}
-      >
-        <span className="flex size-8 shrink-0 items-center justify-center rounded-[9px] bg-white text-[#4e9208] shadow-[0_3px_8px_rgba(36,88,4,0.18)]">
-          <Home className="size-4.5" strokeWidth={2.2} />
-        </span>
-        <span className={collapsed ? "lg:hidden" : ""}>Início</span>
-      </Link>
-
-      <SidebarSection title="Arquivos e contatos" items={quickFiles} collapsed={collapsed} />
+      <SidebarSection title="Arquivos e contatos" items={quickFiles} collapsed={collapsed} secretAction={revealCreators} />
+      {showCreators ? (
+        <div className={`mt-4 rounded-[12px] bg-[#f9fff4] p-3 text-[#18321d] shadow-[0_8px_18px_rgba(11,52,36,0.08)] ${collapsed ? "lg:hidden" : ""}`}>
+          <div className="mb-2 flex items-center justify-between gap-3">
+            <p className="text-[14px] font-bold">Equipe de criação</p>
+            <span className="rounded-full bg-[#dcecc4] px-2.5 py-1 text-[12px] font-semibold text-[#4d7f10]">
+              Cliques: {secretClicks}
+            </span>
+          </div>
+          <ul className="space-y-1 text-[13px] leading-snug text-[#3f5637]">
+            <li>• Luiz Felipe da Silva e Silva</li>
+            <li>• Beatriz Christine</li>
+            <li>• Luiz Miguel</li>
+          </ul>
+        </div>
+      ) : null}
       <motion.div
         className={`mt-7 ${collapsed ? "lg:hidden" : ""}`}
         animate={{

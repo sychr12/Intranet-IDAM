@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion, type Variants } from "framer-motion";
-import { CalendarDays, ChevronLeft, ChevronRight, MessageCircleHeart, RefreshCw } from "lucide-react";
+import { CalendarDays, ChevronLeft, ChevronRight } from "lucide-react";
 import { NEWS_URL, months, weekdays } from "../_data/home";
 import {
   holidayScopeLabels,
@@ -133,7 +133,7 @@ export function MiniCalendar({
                 updateCursor(new Date(today.getFullYear(), today.getMonth(), 1))
               }
               disabled={isViewingCurrentMonth}
-              className="h-12 rounded-[10px] border border-[#dce6d8] px-4 text-[17px] font-bold text-[#47722b] transition hover:bg-[#edf7df] disabled:cursor-default disabled:bg-[#f2f6ee] disabled:text-[#9aa895]"
+              className="h-12 rounded-[10px] bg-[#0c711f] px-4 text-[17px] font-bold text-white transition hover:bg-[#0f6d20] disabled:cursor-default disabled:bg-[#f2f6ee] disabled:text-[#9aa895]"
             >
               Hoje
             </motion.button>
@@ -199,7 +199,7 @@ export function MiniCalendar({
           </div>
         </div>
 
-        <div className="overflow-hidden rounded-[12px] border border-[#e2e9de] bg-[#fbfcfa]">
+        <div className="overflow-visible rounded-[12px] border border-[#e2e9de] bg-[#fbfcfa]">
           <div className="grid grid-cols-7 bg-[#f1f6ed] px-2 py-2 text-center">
             {weekdays.map((day, index) => (
               <span
@@ -238,7 +238,7 @@ export function MiniCalendar({
                 initial="hidden"
                 animate="show"
                 exit="exit"
-                className="grid grid-cols-7 gap-x-1 gap-y-1.5 px-2 py-2.5 text-center"
+                className="overflow-visible grid grid-cols-7 gap-x-1 gap-y-1.5 px-2 py-2.5 text-center"
               >
                 {calendarDays.map(({ date, day, isCurrentMonth }, index) => {
                   const holidaysOnDate = holidaysByDate.get(toHolidayDateKey(date)) ?? [];
@@ -250,8 +250,7 @@ export function MiniCalendar({
                   const rowIndex = Math.floor(index / 7);
                   const tooltipBelow = rowIndex < 5;
                   const colIndex = index % 7;
-                  const tooltipAlign =
-                    colIndex === 0 ? "left" : colIndex === 6 ? "right" : "center";
+                  const tooltipAlign = colIndex <= 1 ? "left" : colIndex >= 5 ? "right" : "center";
 
                   return (
                     <motion.time
@@ -300,7 +299,7 @@ export function MiniCalendar({
                           />
                           <span
                             role="tooltip"
-                            className={`pointer-events-none absolute z-20 w-max max-w-[180px] rounded-[8px] bg-[#0b3a22] px-2.5 py-1.5 text-center text-[13px] font-semibold leading-snug text-white opacity-0 shadow-[0_6px_16px_rgba(11,58,34,0.35)] transition-opacity duration-150 group-hover:opacity-100 group-focus-visible:opacity-100 ${
+                            className={`pointer-events-none absolute z-20 w-max max-w-[150px] rounded-[8px] bg-[#0b3a22] px-2.5 py-1.5 text-center text-[13px] font-semibold leading-snug text-white opacity-0 shadow-[0_6px_16px_rgba(11,58,34,0.35)] transition-opacity duration-150 group-hover:opacity-100 group-focus-visible:opacity-100 whitespace-normal break-words ${
                               tooltipBelow ? "top-full mt-2" : "bottom-full mb-2"
                             } ${
                               tooltipAlign === "center"
@@ -311,7 +310,7 @@ export function MiniCalendar({
                             }`}
                           >
                             {holidaysOnDate.map((item) => (
-                              <span key={`${item.scope}-${item.name}`} className="block first:font-semibold">
+                              <span key={`${item.scope}-${item.name}`} className="block first:font-semibold text-left">
                                 {item.name}
                                 <span className="ml-1 text-[11px] font-normal text-[#cfe4c9]">
                                   {holidayScopeLabels[item.scope]}
@@ -327,8 +326,8 @@ export function MiniCalendar({
                                 tooltipAlign === "center"
                                   ? "left-1/2 -translate-x-1/2"
                                   : tooltipAlign === "left"
-                                    ? "left-4"
-                                    : "right-4"
+                                    ? "left-2"
+                                    : "right-2"
                               }`}
                               aria-hidden="true"
                             />
@@ -380,99 +379,6 @@ interface NoticesProps {
   unavailable: boolean;
 }
 
-interface DailyMessageResponse {
-  message: string;
-}
-
-function DailyMessage() {
-  const [message, setMessage] = useState<string>();
-  const [isRefreshing, setIsRefreshing] = useState(false);
-
-  const fetchMessage = async (signal?: AbortSignal) => {
-    try {
-      const response = await fetch(`/api/daily-message?t=${Date.now()}`, {
-        signal,
-        cache: "no-store",
-      });
-      if (!response.ok) throw new Error("Mensagem indisponível");
-      const payload = (await response.json()) as DailyMessageResponse;
-      setMessage(payload.message);
-    } catch (error) {
-      if (error instanceof DOMException && error.name === "AbortError") return;
-      setMessage("Que o seu dia seja de boas ideias, parceria e resultados positivos.");
-    }
-  };
-
-  useEffect(() => {
-    const controller = new AbortController();
-    fetchMessage(controller.signal);
-    return () => controller.abort();
-  }, []);
-
-  const handleRandomize = async () => {
-    if (isRefreshing) return;
-    setIsRefreshing(true);
-    await fetchMessage();
-    setIsRefreshing(false);
-  };
-
-  return (
-    <div className="mb-4 overflow-hidden rounded-[12px] border border-[#d9e9cf] bg-[linear-gradient(135deg,#f3f9ee,#edf6e6)] p-3.5 shadow-[0_4px_12px_rgba(29,80,39,0.05)]">
-      <div className="flex gap-3">
-        <span className="flex size-9 shrink-0 items-center justify-center rounded-[10px] bg-[#0b3a22] text-[#b6dc25] shadow-[0_4px_9px_rgba(11,58,34,0.18)]">
-          <MessageCircleHeart className="size-5" />
-        </span>
-        <div className="min-w-0 flex-1">
-          <div className="flex items-center justify-between gap-2">
-            <p className="text-[11px] font-black uppercase tracking-[0.08em] text-[#5d9115]">
-              Mensagem do dia
-            </p>
-            <motion.button
-              type="button"
-              onClick={handleRandomize}
-              disabled={isRefreshing}
-              whileHover={!isRefreshing ? { scale: 1.08 } : undefined}
-              whileTap={!isRefreshing ? { scale: 0.9 } : undefined}
-              aria-label="Sortear nova mensagem"
-              title="Sortear nova mensagem"
-              className="flex size-6 shrink-0 items-center justify-center rounded-full text-[#5d9115] transition hover:bg-[#dcebc8] disabled:cursor-wait disabled:opacity-60"
-            >
-              <motion.span
-                animate={isRefreshing ? { rotate: 360 } : { rotate: 0 }}
-                transition={
-                  isRefreshing
-                    ? { duration: 0.7, repeat: Infinity, ease: "linear" }
-                    : { duration: 0.2 }
-                }
-                className="flex"
-              >
-                <RefreshCw className="size-3.5" />
-              </motion.span>
-            </motion.button>
-          </div>
-
-          {message ? (
-            <AnimatePresence mode="wait">
-              <motion.p
-                key={message}
-                initial={{ opacity: 0, y: 4 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -4 }}
-                transition={{ duration: 0.2 }}
-                className="mt-0.5 text-[13px] font-semibold leading-snug text-[#274b37]"
-              >
-                {message}
-              </motion.p>
-            </AnimatePresence>
-          ) : (
-            <span className="mt-2 block h-3 w-full animate-pulse rounded bg-[#dcebd4]" />
-          )}
-        </div>
-      </div>
-    </div>
-  );
-}
-
 // Resumo do próximo feriado, da próxima data comemorativa e acesso às notícias institucionais.
 export function Notices({ today, holidays, loading, unavailable }: NoticesProps) {
   const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
@@ -499,15 +405,18 @@ export function Notices({ today, holidays, loading, unavailable }: NoticesProps)
   return (
     <ShellCard className="flex min-h-[252px] flex-col p-4 sm:p-5">
       <div className="mb-3 flex items-center justify-between border-b border-[#e7ece4] pb-3">
-        <h2 className="flex items-center gap-2 text-[17px] font-black text-[#0a2d1e]">
-          <span className="flex size-8 items-center justify-center rounded-[9px] bg-[#e8f5d8] text-[#4d7f10]">
-            <CalendarDays className="size-4.5" />
-          </span>
-          Agenda e avisos
-        </h2>
+        <div>
+          <h2 className="flex items-center gap-2 text-[17px] font-black text-[#0a2d1e]">
+            <span className="flex size-8 items-center justify-center rounded-[9px] bg-[#e8f5d8] text-[#4d7f10]">
+              <CalendarDays className="size-4.5" />
+            </span>
+            Agenda e avisos
+          </h2>
+          <p className="mt-1 text-[13px] font-semibold uppercase tracking-[0.08em] text-[#5d9115]">
+            Feriado ou data comemorativa
+          </p>
+        </div>
       </div>
-
-      <DailyMessage />
 
       {loading ? (
         <div className="flex-1 space-y-4">
@@ -579,8 +488,8 @@ export function Notices({ today, holidays, loading, unavailable }: NoticesProps)
           )}
         </div>
       ) : (
-        <div className="flex flex-1 items-center">
-          <div className="min-w-0">
+        <div className="flex flex-1 flex-col justify-between gap-4">
+          <div>
             <h3 className="mb-1 text-[17px] font-bold text-[#153924]">
               Calendário atualizado
             </h3>
@@ -590,8 +499,21 @@ export function Notices({ today, holidays, loading, unavailable }: NoticesProps)
                 : "Não há feriado ou data comemorativa cadastrada neste período."}
             </p>
           </div>
+          <div className="rounded-[14px] bg-[#f4fbf2] p-4 text-[#2b5627] shadow-[0_8px_18px_rgba(11,52,36,0.08)]">
+            <p className="text-[15px] font-semibold">Dica rápida</p>
+            <p className="mt-2 text-[14px] leading-relaxed">
+              Que tal consultar a agenda de reuniões ou verificar notícias recentes para se preparar para a semana?
+            </p>
+          </div>
         </div>
       )}
+
+      <div className="mt-4 rounded-[14px] bg-[#f1f7ed] p-4 text-[#38502f] shadow-[0_8px_18px_rgba(11,52,36,0.08)]">
+        <p className="text-[15px] font-semibold">Fique de olho</p>
+        <p className="mt-2 text-[14px] leading-relaxed">
+          Mantenha sua agenda em dia com feriados e datas comemorativas — toda atualização é importante para planejar o dia.
+        </p>
+      </div>
 
       <motion.a
         whileHover={{ y: -2 }}
@@ -599,7 +521,7 @@ export function Notices({ today, holidays, loading, unavailable }: NoticesProps)
         href={NEWS_URL}
         target="_blank"
         rel="noopener noreferrer"
-        className="mt-4 flex min-h-[54px] items-center justify-center gap-2 self-start rounded-[10px] bg-[linear-gradient(135deg,#78b313,#559806)] px-6 py-3 text-[17px] font-black text-white shadow-[0_8px_16px_rgba(82,145,6,0.2)] transition-shadow hover:brightness-105"
+        className="mt-4 flex min-h-[54px] items-center justify-center gap-2 self-start rounded-[10px] bg-[#0b3a22] px-6 py-3 text-[17px] font-black text-white shadow-[0_8px_16px_rgba(11,58,34,0.2)] transition hover:bg-[#082f1b]"
       >
         Ver comunicados
         <ChevronRight className="size-5" />

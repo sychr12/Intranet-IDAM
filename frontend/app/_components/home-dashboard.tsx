@@ -31,10 +31,10 @@ export function QuickAccess() {
     <section className="overflow-hidden rounded-[16px] border border-[#e3e9df] bg-white p-4 shadow-[0_12px_30px_rgba(11,52,36,0.07)] sm:p-5">
       <div className="mb-4 flex items-end justify-between gap-4 border-b border-[#e7ece7] pb-3">
         <div>
-          <h2 className="text-[17px] font-black tracking-[-0.01em] text-[#0a2d1e]">
+          <h2 className="text-[21px] font-black tracking-[-0.01em] text-[#0a2d1e]">
             Acessos rápidos
           </h2>
-          <p className="mt-0.5 text-[12px] font-medium text-[#638070]">
+          <p className="mt-0.5 text-[14px] font-medium text-[#638070]">
             Sistemas institucionais
           </p>
         </div>
@@ -63,14 +63,14 @@ export function QuickAccess() {
               <span className="flex size-8 items-center justify-center rounded-full bg-white/10 text-[#b6dc25] transition group-hover:bg-white/15">
                 <Icon className="size-5" strokeWidth={2} aria-hidden="true" />
               </span>
-              <span className="text-[12px] font-extrabold tracking-[0.015em] leading-none">{app.title}</span>
+              <span className="text-[16px] font-extrabold tracking-[0.015em] leading-none">{app.title}</span>
             </motion.a>
           );
         })}
       </motion.div>
 
       <div className="mt-4 border-t border-[#e7ece7] pt-3.5">
-        <p className="mb-2.5 text-[11px] font-bold uppercase tracking-[0.09em] text-[#5d9115]">
+        <p className="mb-2.5 text-[12.5px] font-bold uppercase tracking-[0.09em] text-[#5d9115]">
           Aplicativos Microsoft 365
         </p>
         <div className="grid grid-cols-3 gap-2 sm:grid-cols-6 sm:gap-2.5">
@@ -91,7 +91,7 @@ export function QuickAccess() {
                 height={23}
                 className={`${app.imageClassName ?? "size-5"} object-contain`}
               />
-              <span className="text-[11px] font-semibold leading-none">{app.title}</span>
+              <span className="text-[15px] font-semibold leading-none">{app.title}</span>
             </motion.a>
           ))}
         </div>
@@ -125,7 +125,7 @@ export function DepartmentHub({
   const links = departmentLinks[selectedDept];
 
   return (
-    <section className="h-full overflow-hidden rounded-[16px] border border-[#dfe7dc] bg-white shadow-[0_12px_30px_rgba(11,52,36,0.09)]">
+    <section className="overflow-hidden rounded-[16px] border border-[#dfe7dc] bg-white shadow-[0_12px_30px_rgba(11,52,36,0.09)]">
       <div className="bg-[linear-gradient(135deg,#07391f,#004427)] p-4 text-white sm:p-5">
         <div className="mb-3 flex items-center justify-between border-b border-[#9bc914]/70 pb-3">
           <h2 className="text-[17px] font-black">Áreas e sistemas</h2>
@@ -205,6 +205,13 @@ export function DepartmentHub({
             ))}
           </motion.div>
         </AnimatePresence>
+
+        <div className="mt-4 rounded-[14px] border border-[#e8ece4] bg-[#f7f9f5] p-4 text-[#2b4c35] shadow-sm">
+          <p className="text-[15px] font-semibold">Dica rápida</p>
+          <p className="mt-2 text-[14px] leading-relaxed text-[#516854]">
+            Use as abas de departamento acima para chegar rapidamente ao sistema que você precisa hoje.
+          </p>
+        </div>
       </div>
     </section>
   );
@@ -217,7 +224,7 @@ export function BannerCarousel() {
   useEffect(() => {
     const timer = window.setInterval(() => {
       setActive((current) => (current + 1) % carouselSlides.length);
-    }, 6000);
+    }, 9000);
 
     return () => window.clearInterval(timer);
   }, []);

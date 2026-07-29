@@ -1,8 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { motion, type Variants } from "framer-motion";
 import { MiniCalendar, Notices } from "./_components/calendar-widgets";
+import { DailyMessageCard } from "./_components/daily-message-card";
 import { Footer } from "./_components/footer";
+import { ShellCard } from "./_components/shell-card";
 import {
   BannerCarousel,
   DepartmentHub,
@@ -11,6 +14,11 @@ import {
 import { Header, Sidebar } from "./_components/navigation";
 import type { DepartmentKey } from "./_data/home";
 import { useHolidays } from "./_hooks/use-holidays";
+
+const pageVariants: Variants = {
+  hidden: { opacity: 0, y: 16 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.45, ease: "easeOut" } },
+};
 
 export default function Page() {
   // Estados das abas, da navegação responsiva e da integração com os serviços.
@@ -57,7 +65,12 @@ export default function Page() {
         className={`fixed inset-0 z-[60] bg-[#001b10]/55 backdrop-blur-[2px] transition-opacity lg:hidden ${sidebarOpen ? "opacity-100" : "pointer-events-none opacity-0"}`}
       />
 
-      <div className="flex">
+      <motion.div
+        variants={pageVariants}
+        initial="hidden"
+        animate="show"
+        className="flex gap-3 lg:gap-4"
+      >
         <Sidebar
           open={sidebarOpen}
           collapsed={sidebarCollapsed}
@@ -65,23 +78,26 @@ export default function Page() {
         />
 
         {/* Conteúdo principal: atalhos, banners, áreas internas e calendário. */}
-        <main className="min-w-0 flex-1 px-4 py-4 sm:px-5 sm:py-5 xl:px-6">
-          <div className="mx-auto grid w-full max-w-[1360px] grid-cols-1 gap-4">
+        <main className="min-w-0 flex-1 px-0 py-4 pr-3 sm:px-0 sm:pr-4 sm:py-5 xl:px-0 xl:pr-5">
+          <div className="grid w-full gap-4">
             <div className="grid min-w-0 gap-4">
-              <div className="grid min-w-0 grid-cols-1 items-stretch gap-4 xl:grid-cols-[minmax(0,2.35fr)_minmax(280px,0.95fr)]">
-                <div className="grid min-w-0 content-start gap-4 xl:grid-rows-[auto_minmax(0,1fr)] xl:content-stretch xl:gap-5">
+              <div className="grid min-w-0 grid-cols-1 items-start gap-4 xl:grid-cols-[minmax(0,2.3fr)_minmax(360px,1fr)]">
+                <div className="grid min-w-0 content-start gap-4 xl:gap-5">
                   <QuickAccess />
                   <div className="flex min-w-0 items-center">
                     <BannerCarousel />
                   </div>
                 </div>
-                <DepartmentHub
-                  selectedDept={selectedDept}
-                  setSelectedDept={setSelectedDept}
-                />
+                <div className="grid gap-4">
+                  <DepartmentHub
+                    selectedDept={selectedDept}
+                    setSelectedDept={setSelectedDept}
+                  />
+                  <DailyMessageCard />
+                </div>
               </div>
 
-              <div className="grid min-w-0 grid-cols-1 items-stretch gap-4 md:grid-cols-[minmax(0,1.15fr)_minmax(320px,0.85fr)]">
+              <div className="grid min-w-0 grid-cols-1 items-start gap-4 md:grid-cols-[minmax(0,1.15fr)_minmax(360px,0.85fr)]">
                 <MiniCalendar
                   today={now}
                   loading={false}
@@ -89,17 +105,19 @@ export default function Page() {
                   holidaysLoading={calendarHolidayState.loading}
                   onYearChange={setCalendarYear}
                 />
-                <Notices
-                  today={now}
-                  holidays={noticeHolidayState.holidays}
-                  loading={noticeHolidayState.loading}
-                  unavailable={noticeHolidayState.unavailable}
-                />
+                <div className="grid gap-4">
+                  <Notices
+                    today={now}
+                    holidays={noticeHolidayState.holidays}
+                    loading={noticeHolidayState.loading}
+                    unavailable={noticeHolidayState.unavailable}
+                  />
+                </div>
               </div>
             </div>
           </div>
         </main>
-      </div>
+      </motion.div>
 
       <Footer />
     </div>
