@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { MessageCircleHeart, Sparkles } from "lucide-react";
 import { getDailyMessage } from "../_lib/daily-message";
@@ -8,15 +8,20 @@ import { getDailyMessage } from "../_lib/daily-message";
 // Card isolado que revela a mensagem do dia sob demanda.
 export function DailyMessageCard() {
   const [revealed, setRevealed] = useState(false);
-  const { message } = getDailyMessage();
+  const [message, setMessage] = useState("");
+
+  useEffect(() => {
+    const deviceSource = typeof navigator !== "undefined" ? navigator.userAgent : "";
+    setMessage(getDailyMessage(new Date(), deviceSource).message);
+  }, []);
 
   return (
-    <section className="overflow-hidden rounded-[16px] border border-[#e3e9df] bg-white p-4 shadow-[0_12px_30px_rgba(11,52,36,0.07)] sm:p-5">
+    <section id="mensagens" className="overflow-hidden rounded-[16px] border border-[#e3e9df] bg-white p-4 shadow-[0_12px_30px_rgba(11,52,36,0.07)] sm:p-5">
       <div className="mb-3 flex items-center gap-2.5 border-b border-[#e7ece7] pb-3">
         <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-[#0a4b2b] text-[#b6dc25]">
           <MessageCircleHeart className="size-4.5" strokeWidth={2} />
         </span>
-        <h2 className="text-[15px] font-black uppercase tracking-[0.03em] text-[#0a2d1e]">
+        <h2 className="text-[17px] font-black uppercase tracking-[0.03em] text-[#0a2d1e]">
           Mensagem do dia
         </h2>
       </div>
@@ -29,7 +34,7 @@ export function DailyMessageCard() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3, ease: "easeOut" }}
-            className="text-[14px] leading-relaxed text-[#173425]"
+            className="text-[16px] leading-relaxed text-[#173425]"
           >
             {message}
           </motion.p>

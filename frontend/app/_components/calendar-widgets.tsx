@@ -112,7 +112,7 @@ export function MiniCalendar({
     today.getFullYear() === cursor.getFullYear();
 
   return (
-    <motion.div variants={cardEntranceVariants} initial="hidden" animate="show">
+    <motion.div id="calendar" variants={cardEntranceVariants} initial="hidden" animate="show">
       <ShellCard className="min-h-[252px] p-4 sm:p-5">
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
           <h2 className="flex items-center gap-2 text-[17px] font-black text-[#0b3a22]">
@@ -403,7 +403,7 @@ export function Notices({ today, holidays, loading, unavailable }: NoticesProps)
     });
 
   return (
-    <ShellCard className="flex min-h-[252px] flex-col p-4 sm:p-5">
+    <ShellCard id="agenda" className="flex min-h-[252px] flex-col p-4 sm:p-5">
       <div className="mb-3 flex items-center justify-between border-b border-[#e7ece4] pb-3">
         <div>
           <h2 className="flex items-center gap-2 text-[17px] font-black text-[#0a2d1e]">

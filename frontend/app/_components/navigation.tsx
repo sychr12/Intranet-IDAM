@@ -1,13 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type MouseEvent } from "react";
 import { motion, type Variants } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
-import { ChevronLeft, ChevronRight, Clock3, Home, Menu } from "lucide-react";
+import { ChevronLeft, ChevronRight, Clock3, Menu } from "lucide-react";
 import {
   quickFiles,
   securityTips,
+  headerShortcuts,
   type LinkItem,
 } from "../_data/home";
 
@@ -36,6 +37,7 @@ function formatHeaderDateTime(date: Date | null) {
 }
 
 // Relógio em tempo real exibido no canto direito do cabeçalho.
+// (design mantido idêntico ao original — não foi alterado)
 function HeaderClock() {
   const [currentTime, setCurrentTime] = useState<Date | null>(null);
 
@@ -47,7 +49,7 @@ function HeaderClock() {
     return () => window.clearInterval(timer);
   }, []);
 
-  const { time, date, dateTime } = formatHeaderDateTime(currentTime);
+  const { time, date } = formatHeaderDateTime(currentTime);
 
   return (
     <div
@@ -72,8 +74,70 @@ function HeaderClock() {
   );
 }
 
-// Cabeçalho com a marca e os links para sistemas externos do IDAM.
+// Cabeçalho: visual externo (fundo gradiente + animação de entrada + logo) do design 2,
+// com os dropdowns "Áreas"/"Sistemas" e atalhos rápidos do design 1.
 export function Header({ onToggleMenu }: { onToggleMenu: () => void }) {
+  const smoothScrollToElement = (el: HTMLElement) => {
+    const headerOffset = 80;
+    const top = el.getBoundingClientRect().top + window.pageYOffset - headerOffset;
+
+    window.scrollTo({ top, behavior: "smooth" });
+
+    setTimeout(() => {
+      el.classList.remove("flash-highlight");
+      void el.getBoundingClientRect();
+      el.classList.add("flash-highlight");
+
+      const priorTab = el.getAttribute("tabindex");
+      if (priorTab === null) {
+        el.setAttribute("tabindex", "-1");
+      }
+
+      el.focus({ preventScroll: true } as FocusOptions);
+
+      if (priorTab === null) {
+        setTimeout(() => el.removeAttribute("tabindex"), 1200);
+      }
+    }, 600);
+  };
+
+  const scrollToHash = (href: string) => {
+    const hashIndex = href.indexOf("#");
+    if (hashIndex === -1) {
+      window.location.href = href;
+      return;
+    }
+
+    const id = href.slice(hashIndex + 1);
+    const el = document.getElementById(id);
+    if (!el) {
+      window.location.href = href;
+      return;
+    }
+
+    smoothScrollToElement(el);
+  };
+
+  const handleHeaderLinkClick = (
+    href: string,
+    event: MouseEvent<HTMLAnchorElement>
+  ) => {
+    if (href.includes("#")) {
+      event.preventDefault();
+      scrollToHash(href);
+      return;
+    }
+
+    if (href.startsWith("/")) {
+      const idCandidate = href.replace(/^\//, "").replace(/\/.*/, "");
+      const el = document.getElementById(idCandidate);
+      if (el) {
+        event.preventDefault();
+        smoothScrollToElement(el);
+      }
+    }
+  };
+
   return (
     <motion.header
       initial={{ y: -24, opacity: 0 }}
@@ -82,6 +146,7 @@ export function Header({ onToggleMenu }: { onToggleMenu: () => void }) {
       className="sticky top-0 z-50 h-[70px] overflow-hidden border-b border-white/10 bg-[linear-gradient(105deg,#073821,#052f1f_55%,#004025)] text-white shadow-[0_8px_24px_rgba(3,42,27,0.16)] lg:h-[78px]"
     >
       <div className="relative mx-auto flex h-full max-w-[1920px] items-center gap-3 px-4 sm:px-5 xl:gap-6 xl:px-6">
+        {/* Botão do menu lateral */}
         <motion.button
           onClick={onToggleMenu}
           whileHover={{ scale: 1.08 }}
@@ -92,6 +157,7 @@ export function Header({ onToggleMenu }: { onToggleMenu: () => void }) {
           <Menu className="size-5.5" />
         </motion.button>
 
+        {/* Logo + marca (design 2) */}
         <Link
           href="/"
           className="flex h-[56px] w-[120px] shrink-0 items-center gap-2 overflow-hidden sm:w-[250px]"
@@ -112,6 +178,31 @@ export function Header({ onToggleMenu }: { onToggleMenu: () => void }) {
           </span>
         </Link>
 
+        {/* Atalhos centrais do cabeçalho */}
+        <div className="flex flex-1 items-center justify-center">
+          <div className="flex flex-wrap items-center gap-2 -translate-x-12">
+            {headerShortcuts.map((item, index) => {
+              const Icon = item.icon;
+              return (
+                <motion.a
+                  key={item.title}
+                  href={item.href}
+                  onClick={(event) => handleHeaderLinkClick(item.href, event)}
+                  initial={{ opacity: 0, y: -8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3, delay: index * 0.05, ease: "easeOut" }}
+                  whileHover={{ y: -2, scale: 1.02 }}
+                  className="flex h-10 items-center justify-center gap-2 rounded-[10px] bg-white/5 px-3 text-[15px] font-semibold text-white/90 transition hover:bg-white/10"
+                >
+                  <Icon className="size-5" />
+                  <span className="hidden lg:inline">{item.title}</span>
+                </motion.a>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Relógio — design da direita, mantido sem alteração */}
         <HeaderClock />
       </div>
     </motion.header>
@@ -205,7 +296,6 @@ interface SidebarProps {
   onClose: () => void;
 }
 
-
 // Navegação lateral responsiva: gaveta no celular e versão compacta no desktop.
 export function Sidebar({ open, collapsed, onClose }: SidebarProps) {
   const [showCreators, setShowCreators] = useState(false);
@@ -256,9 +346,16 @@ export function Sidebar({ open, collapsed, onClose }: SidebarProps) {
         </motion.button>
       </div>
 
-      <SidebarSection title="Arquivos e contatos" items={quickFiles} collapsed={collapsed} secretAction={revealCreators} />
+      <SidebarSection
+        title="Arquivos e contatos"
+        items={quickFiles}
+        collapsed={collapsed}
+        secretAction={revealCreators}
+      />
       {showCreators ? (
-        <div className={`mt-4 rounded-[12px] bg-[#f9fff4] p-3 text-[#18321d] shadow-[0_8px_18px_rgba(11,52,36,0.08)] ${collapsed ? "lg:hidden" : ""}`}>
+        <div
+          className={`mt-4 rounded-[12px] bg-[#f9fff4] p-3 text-[#18321d] shadow-[0_8px_18px_rgba(11,52,36,0.08)] ${collapsed ? "lg:hidden" : ""}`}
+        >
           <div className="mb-2 flex items-center justify-between gap-3">
             <p className="text-[14px] font-bold">Equipe de criação</p>
             <span className="rounded-full bg-[#dcecc4] px-2.5 py-1 text-[12px] font-semibold text-[#4d7f10]">
@@ -284,11 +381,7 @@ export function Sidebar({ open, collapsed, onClose }: SidebarProps) {
           ease: "easeInOut",
         }}
       >
-        <SidebarSection
-          title="Dicas de Segurança"
-          items={securityTips}
-          boxed
-        />
+        <SidebarSection title="Dicas de Segurança" items={securityTips} boxed />
       </motion.div>
     </aside>
   );

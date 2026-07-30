@@ -6,6 +6,8 @@ import {
   FolderOpen,
   Globe,
   Headphones,
+  CalendarDays,
+  MessageCircleHeart,
   Layers,
   Lock,
   Mail,
@@ -49,6 +51,22 @@ export const headerLinks: LinkItem[] = [
   { title: "Siged", icon: ClipboardList, href: "https://sistemas.sefaz.am.gov.br/siged/login" },
   { title: "Site IDAM", icon: Globe, href: "https://www.idam.am.gov.br/" },
   { title: "Suporte", icon: Headphones, href: "https://nti.idam.am.gov.br/front/helpdesk.public.php" },
+];
+
+// Atalhos rápidos exibidos no cabeçalho (seção superior): links internos e seções da intranet
+export const headerShortcuts: LinkItem[] = [
+  { title: "Calendário", icon: CalendarDays, href: "/#calendar" },
+  { title: "Agenda", icon: ClipboardList, href: "/agenda" },
+  { title: "Mensagens", icon: MessageCircleHeart, href: "/mensagens" },
+];
+
+// Áreas internas da intranet — usadas pelo menu de atalhos no cabeçalho
+export const headerAreas: LinkItem[] = [
+  { title: "Recursos Humanos", icon: User, href: "/rh" },
+  { title: "Sistema de Gestão", icon: Settings, href: "/sgc" },
+  { title: "Departamento Jurídico", icon: Users, href: "/pj" },
+  { title: "Documentos", icon: FolderOpen, href: "/documentos" },
+  { title: "Chamados TI", icon: Wrench, href: "https://nti.idam.am.gov.br/front/helpdesk.public.php" },
 ];
 
 // Sistemas institucionais exibidos como acessos rápidos.

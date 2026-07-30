@@ -31,3 +31,15 @@ a:focus-visible {
   outline: 3px solid #8bc600;
   outline-offset: 3px;
 }
+
+/* Destaque temporário ao rolar para uma seção */
+.flash-highlight {
+  animation: flash-highlight 1.2s ease-in-out;
+}
+
+@keyframes flash-highlight {
+  0% { box-shadow: 0 0 0 0 rgba(189, 255, 119, 0.0); background-color: rgba(189,255,119,0.12); }
+  30% { box-shadow: 0 6px 18px 4px rgba(189, 255, 119, 0.18); background-color: rgba(189,255,119,0.18); }
+  70% { box-shadow: 0 0 0 0 rgba(189, 255, 119, 0.08); background-color: rgba(189,255,119,0.08); }
+  100% { box-shadow: 0 0 0 0 rgba(189, 255, 119, 0.0); background-color: transparent; }
+}
