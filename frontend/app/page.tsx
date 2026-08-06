@@ -89,11 +89,11 @@ export default function Page() {
                   </div>
                 </div>
                 <div className="grid gap-4">
+                  <DailyMessageCard />
                   <DepartmentHub
                     selectedDept={selectedDept}
                     setSelectedDept={setSelectedDept}
                   />
-                  <DailyMessageCard />
                 </div>
               </div>
 

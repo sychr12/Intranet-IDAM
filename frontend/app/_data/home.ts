@@ -71,7 +71,7 @@ export const headerAreas: LinkItem[] = [
 
 // Sistemas institucionais exibidos como acessos rápidos.
 export const quickAccessLinks: LinkItem[] = [
-  { title: "AJURI", icon: Layers, href: "https://ajuri.amazonas.am.gov.br/" },
+  { title: "AJURI", icon: Layers, href: "https://www.ajuri.am.gov.br/" },
   { title: "E-COMPRAS", icon: BarChart3, href: "https://www.e-compras.am.gov.br/" },
   { title: "EMAIL", icon: Mail, href: "https://outlook.office365.com/mail/" },
   { title: "SEFAZ", icon: Globe, href: "https://www.sefaz.am.gov.br/" },
@@ -191,11 +191,7 @@ export const carouselSlides: CarouselSlide[] = [
     alt: "Banner IDAM Amazonas - Conectados com o que importa",
     onClick: "https://www.idam.am.gov.br/intranet/",
   },
-  {
-    src: "/Gov/banner-idam-producao.png",
-    alt: "Produção Rural Sustentável",
-    onClick: "https://www.idam.am.gov.br/",
-  },
+
   {
     src: "/Gov/banner-malware.png",
     alt: "Aprenda sobre malware e proteja seus dispositivos",
