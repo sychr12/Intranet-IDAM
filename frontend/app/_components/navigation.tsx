@@ -178,9 +178,9 @@ export function Header({ onToggleMenu }: { onToggleMenu: () => void }) {
           </span>
         </Link>
 
-        {/* Atalhos centrais do cabeçalho */}
-        <div className="flex flex-1 items-center justify-center">
-          <div className="flex flex-wrap items-center gap-2 -translate-x-12">
+        {/* Atalhos à direita do cabeçalho */}
+        <div className="flex flex-1 items-center justify-end">
+          <div className="flex flex-wrap items-center gap-2">
             {headerShortcuts.map((item, index) => {
               const Icon = item.icon;
               return (
@@ -364,8 +364,8 @@ export function Sidebar({ open, collapsed, onClose }: SidebarProps) {
           </div>
           <ul className="space-y-1 text-[13px] leading-snug text-[#3f5637]">
             <li>• Luiz Felipe da Silva e Silva</li>
-            <li>• Beatriz Christine</li>
-            <li>• Luiz Miguel</li>
+            <li>• Beatriz Christine Azevedo Batista</li>
+            <li>• Luiz Miguel Firmino Pinheiro</li>
           </ul>
         </div>
       ) : null}
