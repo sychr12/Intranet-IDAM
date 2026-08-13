@@ -1025,7 +1025,7 @@ function getRandomIndex() {
   return Math.floor(Math.random() * dailyMessages.length);
 }
 
-export function getDailyMessageIndex(date = new Date(), source = "") {
+export function getDailyMessageIndex() {
   return getRandomIndex();
 }
 
@@ -1033,9 +1033,9 @@ export function getDailyMessageByIndex(index: number) {
   return dailyMessages[index % dailyMessages.length];
 }
 
-export function getDailyMessage(date = new Date(), source = "") {
+export function getDailyMessage(date = new Date()) {
   const dateKey = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
-  const index = getDailyMessageIndex(date, source);
+  const index = getDailyMessageIndex();
 
   return { date: dateKey, message: getDailyMessageByIndex(index) };
 }

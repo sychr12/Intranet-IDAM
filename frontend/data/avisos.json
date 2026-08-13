@@ -14,5 +14,135 @@
     "priority": "urgente",
     "link": "https://intranet.empresa.com/comunicados/manutencao",
     "createdAt": "2026-08-13T05:38:14.797Z"
+  },
+  {
+    "id": 1786600117375,
+    "title": "Manutenção Programada",
+    "message": "O sistema ficará indisponível hoje das 18h às 19h para manutenção.\nAgradecemos a compreensão!",
+    "priority": "urgente",
+    "createdAt": "2026-08-13T05:48:37.375Z",
+    "link": "https://intranet.empresa.com/comunicados/manutencao"
+  },
+  {
+    "id": 1786600129514,
+    "title": "Manutenção Programada",
+    "message": "O sistema ficará indisponível hoje das 18h às 19h para manutenção.\nAgradecemos a compreensão!",
+    "priority": "importante",
+    "createdAt": "2026-08-13T05:48:49.514Z",
+    "link": "https://intranet.empresa.com/comunicados/manutencao"
+  },
+  {
+    "id": 1786600206866,
+    "title": "Manutenção Programada",
+    "message": "O sistema ficará indisponível hoje das 18h às 19h para manutenção.\nAgradecemos a compreensão!",
+    "priority": "importante",
+    "createdAt": "2026-08-13T05:50:06.866Z",
+    "link": "https://intranet.empresa.com/comunicados/manutencao"
+  },
+  {
+    "id": 1786600218025,
+    "title": "Manutenção Programada",
+    "message": "O sistema ficará indisponível hoje das 18h às 19h para manutenção.\nAgradecemos a compreensão!",
+    "priority": "urgente",
+    "createdAt": "2026-08-13T05:50:18.025Z",
+    "link": "https://intranet.empresa.com/comunicados/manutencao"
+  },
+  {
+    "id": 1786600299060,
+    "title": "Manutenção Programada",
+    "message": "O sistema ficará indisponível hoje das 18h às 19h para manutenção.\nAgradecemos a compreensão!",
+    "priority": "urgente",
+    "createdAt": "2026-08-13T05:51:39.060Z",
+    "link": "https://intranet.empresa.com/comunicados/manutencao"
+  },
+  {
+    "id": 1786600392326,
+    "title": "Manutenção Programada",
+    "message": "O sistema ficará indisponível hoje das 18h às 19h para manutenção.\nAgradecemos a compreensão!",
+    "priority": "urgente",
+    "createdAt": "2026-08-13T05:53:12.326Z",
+    "link": "https://intranet.empresa.com/comunicados/manutencao"
+  },
+  {
+    "id": 1786600472254,
+    "title": "Manutenção Programada",
+    "message": "O sistema ficará indisponível hoje das 18h às 19h para manutenção.\nAgradecemos a compreensão!",
+    "priority": "urgente",
+    "createdAt": "2026-08-13T05:54:32.254Z",
+    "link": "https://intranet.empresa.com/comunicados/manutencao"
+  },
+  {
+    "id": 1786600526242,
+    "title": "teste",
+    "message": "tetetetetettttttttttttttttttt",
+    "priority": "urgente",
+    "createdAt": "2026-08-13T05:55:26.242Z",
+    "link": "https://intranet.empresa.com/comunicados/manutencao",
+    "imageUrl": "/uploads/avisos/1786600526240-af1bfabb-7a4e-4064-b8fc-110ce6f305dd.png"
+  },
+  {
+    "id": 1786600538904,
+    "title": "teste",
+    "message": "tetetetetettttttttttttttttttt",
+    "priority": "urgente",
+    "createdAt": "2026-08-13T05:55:38.904Z",
+    "link": "https://intranet.empresa.com/comunicados/manutencao",
+    "imageUrl": "/uploads/avisos/1786600538903-24500213-a680-4b0d-9a3f-1c3bb30da165.png"
+  },
+  {
+    "id": 1786600592497,
+    "title": "teste",
+    "message": "tetetetetettttttttttttttttttt",
+    "priority": "urgente",
+    "createdAt": "2026-08-13T05:56:32.497Z",
+    "link": "https://intranet.empresa.com/comunicados/manutencao",
+    "imageUrl": "/uploads/avisos/1786600592495-410728b8-341b-4db1-999a-652bdceddf9d.png"
+  },
+  {
+    "id": 1786600841294,
+    "title": "r",
+    "message": "r",
+    "priority": "urgente",
+    "createdAt": "2026-08-13T06:00:41.294Z"
+  },
+  {
+    "id": 1786600933339,
+    "title": "Mensagem",
+    "message": "Mensagem",
+    "priority": "urgente",
+    "createdAt": "2026-08-13T06:02:13.339Z",
+    "imageUrl": "/uploads/avisos/1786600933337-1f8f6aaf-ba3f-48b5-9a55-d6158826f677.png"
+  },
+  {
+    "id": 1786601055235,
+    "title": "teste",
+    "message": "teste",
+    "priority": "urgente",
+    "createdAt": "2026-08-13T06:04:15.235Z",
+    "imageUrl": "/uploads/avisos/1786601055233-fbda81dd-9b9b-4fc7-b0dd-c7bba077d739.png"
+  },
+  {
+    "id": 1786601153355,
+    "title": "Internet",
+    "message": "Estamos sem internet por vfafafasdasdfadafasfasdad",
+    "priority": "urgente",
+    "createdAt": "2026-08-13T06:05:53.355Z",
+    "imageUrl": "/uploads/avisos/1786601153353-49cd068a-d791-4b5b-900e-2b52bbd113a3.png"
+  },
+  {
+    "id": 1786602765827,
+    "title": "Manutenção Programada",
+    "message": "O sistema ficará indisponível hoje das 18h às 19h para manutenção.\nAgradecemos a compreensão!",
+    "priority": "urgente",
+    "createdAt": "2026-08-13T06:32:45.827Z",
+    "link": "https://intranet.empresa.com/comunicados/manutencao"
+  },
+  {
+    "id": 1786602774822,
+    "title": "Manutenção Programada",
+    "message": "O sistema ficará indisponível hoje das 18h às 19h para manutenção.\nAgradecemos a compreensão!",
+    "priority": "urgente",
+    "createdAt": "2026-08-13T06:32:54.822Z",
+    "link": "https://intranet.empresa.com/comunicados/manutencao"
   }
 ]

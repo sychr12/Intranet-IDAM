@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { MessageCircleHeart, RefreshCcw, X } from "lucide-react";
 import { getDailyMessage } from "../_lib/daily-message";
@@ -10,8 +10,7 @@ export function DailyMessageCard() {
   const [message, setMessage] = useState("");
 
   const loadMessage = () => {
-    const deviceSource = typeof navigator !== "undefined" ? navigator.userAgent : "";
-    setMessage(getDailyMessage(new Date(), deviceSource).message);
+    setMessage(getDailyMessage(new Date()).message);
   };
 
   const openPopup = () => {
