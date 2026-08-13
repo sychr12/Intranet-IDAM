@@ -1,0 +1,18 @@
+[
+  {
+    "id": 1786598041690,
+    "title": "Manutenção Programada",
+    "message": "O sistema ficará indisponível hoje das 18h às 19h para manutenção.\nAgradecemos a compreensão!",
+    "priority": "urgente",
+    "link": "https://intranet.empresa.com/comunicados/manutencao",
+    "createdAt": "2026-08-13T05:14:01.690Z"
+  },
+  {
+    "id": 1786599494797,
+    "title": "Manutenção Programada",
+    "message": "O sistema ficará indisponível hoje das 18h às 19h para manutenção.\nAgradecemos a compreensão!",
+    "priority": "urgente",
+    "link": "https://intranet.empresa.com/comunicados/manutencao",
+    "createdAt": "2026-08-13T05:38:14.797Z"
+  }
+]
