@@ -1,15 +1,20 @@
-import { randomUUID, timingSafeEqual } from "node:crypto";
+import { timingSafeEqual } from "node:crypto";
 import {
   mkdir,
   readFile,
   rename,
+  unlink,
   writeFile,
 } from "node:fs/promises";
 import path from "node:path";
-import { NextRequest, NextResponse } from "next/server";
+
+import {
+  NextRequest,
+  NextResponse,
+} from "next/server";
 
 // ============================================================
-// CONFIGURAÇÃO NEXT.JS
+// NEXT.JS
 // ============================================================
 
 export const runtime = "nodejs";
@@ -20,24 +25,53 @@ export const revalidate = 0;
 // TIPOS
 // ============================================================
 
-type Priority =
+export type Priority =
   | "urgente"
   | "importante"
   | "normal";
 
-type Aviso = {
+export type Aviso = {
   id: number;
+
   title: string;
+
   message: string;
+
   priority: Priority;
 
   imageUrl?: string;
+
   imageAlt?: string;
 
   publishedDate?: string;
+
   expirationDate?: string;
 
   createdAt: string;
+
+  active: boolean;
+
+  model?: string;
+
+  size?: string;
+
+  icon?: string;
+
+  showDates?: boolean;
+
+  backgroundColor?: string;
+
+  textColor?: string;
+
+  highlightColor?: string;
+
+  pageCentral?: boolean;
+
+  pageLogin?: boolean;
+
+  pageHelpdesk?: boolean;
+
+  closable?: boolean;
 };
 
 // ============================================================
@@ -50,7 +84,7 @@ const dataFile = path.join(
   "avisos.json"
 );
 
-const uploadsDir = path.join(
+export const uploadsDir = path.join(
   process.cwd(),
   "public",
   "uploads",
@@ -58,13 +92,16 @@ const uploadsDir = path.join(
 );
 
 // ============================================================
-// CONFIGURAÇÕES
+// CONFIGURAÇÃO
 // ============================================================
 
 const MAX_IMAGE_BYTES =
   5 * 1024 * 1024;
 
-const imageExtensions: Record<string, string> = {
+const imageExtensions: Record<
+  string,
+  string
+> = {
   "image/jpeg": "jpg",
   "image/jpg": "jpg",
   "image/png": "png",
@@ -79,9 +116,10 @@ const imageExtensions: Record<string, string> = {
 let writeQueue: Promise<void> =
   Promise.resolve();
 
-function enqueue<T>(
+export function enqueue<T>(
   task: () => Promise<T>
 ): Promise<T> {
+
   const result =
     writeQueue.then(
       task,
@@ -101,7 +139,7 @@ function enqueue<T>(
 // RESPOSTA SEM CACHE
 // ============================================================
 
-function jsonNoCache(
+export function jsonNoCache(
   data: unknown,
   status = 200
 ) {
@@ -109,10 +147,13 @@ function jsonNoCache(
     data,
     {
       status,
+
       headers: {
         "Cache-Control":
           "no-store, no-cache, must-revalidate, proxy-revalidate",
+
         Pragma: "no-cache",
+
         Expires: "0",
       },
     }
@@ -123,12 +164,14 @@ function jsonNoCache(
 // ERRO
 // ============================================================
 
-function jsonError(
+export function jsonError(
   error: string,
   status: number
 ) {
   return jsonNoCache(
-    { error },
+    {
+      error,
+    },
     status
   );
 }
@@ -141,15 +184,20 @@ function isValidToken(
   provided: string | null,
   expected: string
 ): boolean {
+
   if (!provided) {
     return false;
   }
 
   const actual =
-    Buffer.from(provided);
+    Buffer.from(
+      provided
+    );
 
   const secret =
-    Buffer.from(expected);
+    Buffer.from(
+      expected
+    );
 
   if (
     actual.length !==
@@ -164,32 +212,86 @@ function isValidToken(
   );
 }
 
+export function checkAuth(
+  request: NextRequest
+): boolean {
+
+  const expectedToken =
+    process.env.AVISOS_API_TOKEN;
+
+  /*
+   * Sem token configurado:
+   * permite acesso.
+   */
+  if (
+    !expectedToken ||
+    expectedToken.trim() === ""
+  ) {
+    return true;
+  }
+
+  /*
+   * Aceita:
+   *
+   * Authorization: Bearer TOKEN
+   *
+   * x-api-token: TOKEN
+   *
+   * x-intranet-token: TOKEN
+   */
+
+  const authorization =
+    request.headers.get(
+      "authorization"
+    );
+
+  const apiToken =
+    request.headers.get(
+      "x-api-token"
+    );
+
+  const intranetToken =
+    request.headers.get(
+      "x-intranet-token"
+    );
+
+  let providedToken:
+    | string
+    | null = null;
+
+  if (authorization) {
+
+    providedToken =
+      authorization.replace(
+        /^Bearer\s+/i,
+        ""
+      );
+  }
+
+  if (!providedToken) {
+    providedToken =
+      apiToken;
+  }
+
+  if (!providedToken) {
+    providedToken =
+      intranetToken;
+  }
+
+  return isValidToken(
+    providedToken,
+    expectedToken
+  );
+}
+
 // ============================================================
 // DATA
 // ============================================================
 
-/*
- * Converte uma data recebida pelo formulário.
- *
- * IMPORTANTE:
- *
- * Se o frontend enviar:
- *
- * 2026-08-13T23:59
- *
- * NÃO usamos diretamente:
- *
- * new Date("2026-08-13T23:59")
- *
- * porque queremos controlar explicitamente
- * o fuso horário.
- *
- * O sistema usa America/Sao_Paulo.
- */
-
 function parseDate(
   value: unknown
 ): Date | null {
+
   if (
     typeof value !==
     "string"
@@ -204,10 +306,12 @@ function parseDate(
     return null;
   }
 
-  // ----------------------------------------------------------
-  // FORMATO LOCAL DO INPUT
-  // YYYY-MM-DDTHH:mm
-  // ----------------------------------------------------------
+  /*
+   * YYYY-MM-DDTHH:mm
+   * YYYY-MM-DDTHH:mm:ss
+   *
+   * Sem timezone = horário de Brasília.
+   */
 
   const localMatch =
     trimmed.match(
@@ -215,6 +319,7 @@ function parseDate(
     );
 
   if (localMatch) {
+
     const year =
       Number(localMatch[1]);
 
@@ -231,24 +336,19 @@ function parseDate(
       Number(localMatch[5]);
 
     const second =
-      Number(localMatch[6] ?? "0");
+      Number(
+        localMatch[6] ??
+        "0"
+      );
 
     /*
-     * Brasilia é UTC-3.
+     * Brasilia = UTC-3
      *
-     * Exemplo:
+     * Portanto:
      *
-     * 13/08/2026 23:59
-     *
-     * vira:
-     *
-     * 2026-08-14T02:59:00.000Z
-     *
-     * Isso é CORRETO internamente.
-     *
-     * O ponto importante é que a tela deve
-     * continuar mostrando 13/08/2026 23:59
-     * quando convertida novamente para Brasília.
+     * 14:00 local
+     * =
+     * 17:00 UTC
      */
 
     const utcTimestamp =
@@ -277,12 +377,10 @@ function parseDate(
     return date;
   }
 
-  // ----------------------------------------------------------
-  // DATA ISO COM FUSO
-  // ----------------------------------------------------------
-
   const date =
-    new Date(trimmed);
+    new Date(
+      trimmed
+    );
 
   if (
     Number.isNaN(
@@ -296,38 +394,13 @@ function parseDate(
 }
 
 // ============================================================
-// FORMATAR DATA PARA BRASÍLIA
-// ============================================================
-
-function formatDateBrazil(
-  date: Date
-): string {
-  const formatter =
-    new Intl.DateTimeFormat(
-      "sv-SE",
-      {
-        timeZone:
-          "America/Sao_Paulo",
-        year: "numeric",
-        month: "2-digit",
-        day: "2-digit",
-        hour: "2-digit",
-        minute: "2-digit",
-        second: "2-digit",
-        hourCycle: "h23",
-      }
-    );
-
-  return formatter.format(date);
-}
-
-// ============================================================
 // EXPIRAÇÃO
 // ============================================================
 
 function isAvisoExpirado(
   aviso: Aviso
 ): boolean {
+
   if (
     !aviso.expirationDate
   ) {
@@ -343,13 +416,6 @@ function isAvisoExpirado(
     return false;
   }
 
-  /*
-   * >= é importante.
-   *
-   * Quando chegar exatamente no horário
-   * da expiração, o aviso já está expirado.
-   */
-
   return (
     Date.now() >=
     expiration.getTime()
@@ -363,6 +429,7 @@ function isAvisoExpirado(
 function isAvisoNaoPublicado(
   aviso: Aviso
 ): boolean {
+
   if (
     !aviso.publishedDate
   ) {
@@ -388,8 +455,12 @@ function isAvisoNaoPublicado(
 // LER AVISOS
 // ============================================================
 
-async function readAvisos(): Promise<Aviso[]> {
+export async function readAvisos(): Promise<
+  Aviso[]
+> {
+
   try {
+
     const content =
       await readFile(
         dataFile,
@@ -398,7 +469,10 @@ async function readAvisos(): Promise<Aviso[]> {
 
     const cleanContent =
       content
-        .replace(/^\uFEFF/, "")
+        .replace(
+          /^\uFEFF/,
+          ""
+        )
         .trim();
 
     if (
@@ -419,10 +493,103 @@ async function readAvisos(): Promise<Aviso[]> {
       return [];
     }
 
-    return data as Aviso[];
+    /*
+     * Normaliza avisos antigos.
+     */
+
+    return data.map(
+      (
+        item: any
+      ): Aviso => ({
+        id:
+          Number(
+            item.id
+          ),
+
+        title:
+          String(
+            item.title ??
+            item.titulo ??
+            ""
+          ),
+
+        message:
+          String(
+            item.message ??
+            item.mensagem ??
+            ""
+          ),
+
+        priority:
+          item.priority ===
+            "urgente" ||
+          item.priority ===
+            "importante" ||
+          item.priority ===
+            "normal"
+            ? item.priority
+            : "normal",
+
+        imageUrl:
+          item.imageUrl,
+
+        imageAlt:
+          item.imageAlt,
+
+        publishedDate:
+          item.publishedDate,
+
+        expirationDate:
+          item.expirationDate,
+
+        createdAt:
+          String(
+            item.createdAt ??
+            new Date().toISOString()
+          ),
+
+        active:
+          item.active !== false,
+
+        model:
+          item.model,
+
+        size:
+          item.size,
+
+        icon:
+          item.icon,
+
+        showDates:
+          item.showDates,
+
+        backgroundColor:
+          item.backgroundColor,
+
+        textColor:
+          item.textColor,
+
+        highlightColor:
+          item.highlightColor,
+
+        pageCentral:
+          item.pageCentral,
+
+        pageLogin:
+          item.pageLogin,
+
+        pageHelpdesk:
+          item.pageHelpdesk,
+
+        closable:
+          item.closable,
+      })
+    );
+
   } catch (
     error: unknown
   ) {
+
     const fileError =
       error as NodeJS.ErrnoException;
 
@@ -443,12 +610,13 @@ async function readAvisos(): Promise<Aviso[]> {
 }
 
 // ============================================================
-// SALVAR AVISOS
+// SALVAR
 // ============================================================
 
-async function saveAvisos(
+export async function saveAvisos(
   avisos: Aviso[]
 ): Promise<void> {
+
   await mkdir(
     path.dirname(
       dataFile
@@ -478,206 +646,142 @@ async function saveAvisos(
 }
 
 // ============================================================
-// SALVAR IMAGEM
+// ID
 // ============================================================
 
-async function saveImage(
-  base64: string,
-  mimeType: string
-): Promise<string> {
-  const mime =
-    mimeType
-      .trim()
-      .toLowerCase()
-      .split(";")[0];
-
-  const extension =
-    imageExtensions[mime];
-
-  if (!extension) {
-    throw new Error(
-      "Tipo de imagem não suportado. Use JPG, PNG, GIF ou WEBP."
-    );
-  }
-
-  let normalized =
-    base64.trim();
+function generateId(
+  avisos: Aviso[]
+): number {
 
   if (
-    normalized.startsWith(
-      "data:"
-    )
+    avisos.length === 0
   ) {
-    const separator =
-      normalized.indexOf(",");
-
-    if (
-      separator === -1
-    ) {
-      throw new Error(
-        "Imagem em formato inválido."
-      );
-    }
-
-    normalized =
-      normalized.substring(
-        separator + 1
-      );
+    return 1;
   }
 
-  normalized =
-    normalized.replace(
-      /\s/g,
-      ""
-    );
-
-  if (!normalized) {
-    throw new Error(
-      "Imagem vazia."
-    );
-  }
-
-  if (
-    !/^[A-Za-z0-9+/]*={0,2}$/.test(
-      normalized
-    )
-  ) {
-    throw new Error(
-      "Imagem em formato Base64 inválido."
-    );
-  }
-
-  if (
-    normalized.length % 4 !==
-    0
-  ) {
-    throw new Error(
-      "Imagem em formato Base64 inválido."
-    );
-  }
-
-  let image: Buffer;
-
-  try {
-    image =
-      Buffer.from(
-        normalized,
-        "base64"
-      );
-  } catch {
-    throw new Error(
-      "Não foi possível processar a imagem."
-    );
-  }
-
-  if (
-    image.length === 0
-  ) {
-    throw new Error(
-      "A imagem está vazia."
-    );
-  }
-
-  if (
-    image.byteLength >
-    MAX_IMAGE_BYTES
-  ) {
-    throw new Error(
-      "A imagem não pode ter mais de 5 MB."
-    );
-  }
-
-  await mkdir(
-    uploadsDir,
-    {
-      recursive: true,
-    }
+  return (
+    Math.max(
+      ...avisos.map(
+        (aviso) =>
+          Number(
+            aviso.id
+          ) || 0
+      )
+    ) + 1
   );
-
-  const fileName =
-    `${Date.now()}-${randomUUID()}.${extension}`;
-
-  const filePath =
-    path.join(
-      uploadsDir,
-      fileName
-    );
-
-  await writeFile(
-    filePath,
-    image
-  );
-
-  return `/uploads/avisos/${fileName}`;
 }
 
 // ============================================================
 // GET
 // ============================================================
 
-export async function GET() {
+export async function GET(
+  request: NextRequest
+) {
+
   try {
+
     const avisos =
       await readAvisos();
 
-    if (
-      avisos.length === 0
-    ) {
-      return jsonNoCache(
-        null
+    const {
+      searchParams,
+    } =
+      new URL(
+        request.url
       );
-    }
 
-    const avisosAtivos =
-      avisos.filter(
-        (aviso) => {
-          if (
-            isAvisoNaoPublicado(
-              aviso
-            )
-          ) {
-            return false;
-          }
-
-          if (
-            isAvisoExpirado(
-              aviso
-            )
-          ) {
-            return false;
-          }
-
-          return true;
-        }
+    const active =
+      searchParams.get(
+        "active"
       );
+
+    const publicOnly =
+      searchParams.get(
+        "public"
+      );
+
+    let resultado =
+      avisos;
+
+    /*
+     * ?active=true
+     */
 
     if (
-      avisosAtivos.length ===
-      0
+      active === "true"
     ) {
-      return jsonNoCache(
-        null
-      );
+
+      resultado =
+        resultado.filter(
+          (
+            aviso
+          ) =>
+            aviso.active !==
+            false
+        );
     }
 
-    const aviso =
-      avisosAtivos[
-        avisosAtivos.length - 1
-      ];
+    /*
+     * ?public=true
+     *
+     * Somente o que deve
+     * aparecer na intranet.
+     */
+
+    if (
+      publicOnly === "true"
+    ) {
+
+      resultado =
+        resultado.filter(
+          (
+            aviso
+          ) =>
+            aviso.active !==
+              false &&
+            !isAvisoNaoPublicado(
+              aviso
+            ) &&
+            !isAvisoExpirado(
+              aviso
+            )
+        );
+    }
+
+    /*
+     * Mais recentes primeiro.
+     */
+
+    resultado =
+      [...resultado].sort(
+        (
+          a,
+          b
+        ) =>
+          new Date(
+            b.createdAt
+          ).getTime() -
+          new Date(
+            a.createdAt
+          ).getTime()
+      );
 
     return jsonNoCache(
-      aviso
+      resultado
     );
+
   } catch (
     error
   ) {
+
     console.error(
-      "Erro ao buscar aviso:",
+      "Erro no GET /api/avisos:",
       error
     );
 
     return jsonError(
-      "Não foi possível ler os avisos.",
+      "Erro ao carregar os avisos.",
       500
     );
   }
@@ -690,452 +794,642 @@ export async function GET() {
 export async function POST(
   request: NextRequest
 ) {
-  // ==========================================================
-  // TOKEN
-  // ==========================================================
-
-  const token =
-    process.env
-      .INTRANET_AVISOS_TOKEN;
 
   if (
-    token &&
-    !isValidToken(
-      request.headers.get(
-        "x-intranet-token"
-      ),
-      token
+    !checkAuth(
+      request
     )
   ) {
+
     return jsonError(
       "Não autorizado.",
       401
     );
   }
 
-  // ==========================================================
-  // JSON
-  // ==========================================================
-
-  let body: Record<
-    string,
-    unknown
-  >;
-
   try {
-    body =
-      (await request.json()) as Record<
-        string,
-        unknown
-      >;
-  } catch {
-    return jsonError(
-      "JSON inválido.",
-      400
-    );
-  }
 
-  // ==========================================================
-  // TÍTULO
-  // ==========================================================
+    const body =
+      await request.json();
 
-  const title =
-    typeof body.title ===
-    "string"
-      ? body.title.trim()
-      : "";
+    const title =
+      typeof body.title ===
+      "string"
+        ? body.title.trim()
+        : "";
 
-  if (!title) {
-    return jsonError(
-      "O título é obrigatório.",
-      400
-    );
-  }
+    const message =
+      typeof body.message ===
+      "string"
+        ? body.message.trim()
+        : "";
 
-  if (
-    title.length > 120
-  ) {
-    return jsonError(
-      "O título pode ter no máximo 120 caracteres.",
-      400
-    );
-  }
+    const priority =
+      body.priority;
 
-  // ==========================================================
-  // MENSAGEM
-  // ==========================================================
+    if (!title) {
 
-  const message =
-    typeof body.message ===
-    "string"
-      ? body.message.trim()
-      : "";
-
-  if (!message) {
-    return jsonError(
-      "A mensagem é obrigatória.",
-      400
-    );
-  }
-
-  if (
-    message.length > 1000
-  ) {
-    return jsonError(
-      "A mensagem pode ter no máximo 1000 caracteres.",
-      400
-    );
-  }
-
-  // ==========================================================
-  // PRIORIDADE
-  // ==========================================================
-
-  const priorityValue =
-    body.priority;
-
-  const priority: Priority =
-    priorityValue ===
-      "urgente" ||
-    priorityValue ===
-      "importante" ||
-    priorityValue ===
-      "normal"
-      ? priorityValue
-      : "normal";
-
-  // ==========================================================
-  // ALT DA IMAGEM
-  // ==========================================================
-
-  const imageAlt =
-    typeof body.imageAlt ===
-    "string"
-      ? body.imageAlt.trim()
-      : undefined;
-
-  // ==========================================================
-  // DATA DE PUBLICAÇÃO
-  // ==========================================================
-
-  let publishedDate:
-    | string
-    | undefined;
-
-  if (
-    typeof body.publishedDate ===
-      "string" &&
-    body.publishedDate.trim()
-  ) {
-    const date =
-      parseDate(
-        body.publishedDate
+      return jsonError(
+        "O título é obrigatório.",
+        400
       );
+    }
 
-    if (!date) {
+    if (!message) {
+
+      return jsonError(
+        "A mensagem é obrigatória.",
+        400
+      );
+    }
+
+    if (
+      priority !==
+        "urgente" &&
+      priority !==
+        "importante" &&
+      priority !==
+        "normal"
+    ) {
+
+      return jsonError(
+        "Prioridade inválida.",
+        400
+      );
+    }
+
+    const publishedDate =
+      typeof body.publishedDate ===
+      "string"
+        ? body.publishedDate.trim()
+        : undefined;
+
+    const expirationDate =
+      typeof body.expirationDate ===
+      "string"
+        ? body.expirationDate.trim()
+        : undefined;
+
+    if (
+      publishedDate &&
+      !parseDate(
+        publishedDate
+      )
+    ) {
+
       return jsonError(
         "Data de publicação inválida.",
         400
       );
     }
 
-    publishedDate =
-      date.toISOString();
-  }
+    if (
+      expirationDate &&
+      !parseDate(
+        expirationDate
+      )
+    ) {
 
-  // ==========================================================
-  // DATA DE EXPIRAÇÃO
-  // ==========================================================
-
-  let expirationDate:
-    | string
-    | undefined;
-
-  if (
-    typeof body.expirationDate ===
-      "string" &&
-    body.expirationDate.trim()
-  ) {
-    const date =
-      parseDate(
-        body.expirationDate
-      );
-
-    if (!date) {
       return jsonError(
         "Data de expiração inválida.",
         400
       );
     }
 
-    expirationDate =
-      date.toISOString();
-  }
-
-  // ==========================================================
-  // CRIAÇÃO
-  // ==========================================================
-
-  const createdAt =
-    new Date();
-
-  // ==========================================================
-  // PUBLICAÇÃO PADRÃO
-  // ==========================================================
-
-  if (
-    !publishedDate
-  ) {
-    publishedDate =
-      createdAt.toISOString();
-  }
-
-  // ==========================================================
-  // EXPIRAÇÃO PADRÃO
-  // ==========================================================
-
-  /*
-   * Se nenhuma expiração for enviada,
-   * o aviso ficará ativo por 24 horas.
-   */
-
-  if (
-    !expirationDate
-  ) {
-    const automaticExpiration =
-      new Date(
-        createdAt.getTime() +
-          24 *
-            60 *
-            60 *
-            1000
-      );
-
-    expirationDate =
-      automaticExpiration.toISOString();
-  }
-
-  // ==========================================================
-  // VALIDAR DATAS
-  // ==========================================================
-
-  const published =
-    parseDate(
-      publishedDate
-    );
-
-  const expiration =
-    parseDate(
-      expirationDate
-    );
-
-  if (
-    !published ||
-    !expiration
-  ) {
-    return jsonError(
-      "Não foi possível processar as datas do aviso.",
-      400
-    );
-  }
-
-  if (
-    expiration.getTime() <=
-    published.getTime()
-  ) {
-    return jsonError(
-      "A data de expiração deve ser posterior à data de publicação.",
-      400
-    );
-  }
-
-  // ==========================================================
-  // IMAGEM
-  // ==========================================================
-
-  let imageUrl:
-    | string
-    | undefined;
-
-  const imageBase64 =
-    typeof body.imageBase64 ===
-    "string"
-      ? body.imageBase64.trim()
-      : "";
-
-  const imageMimeType =
-    typeof body.imageMimeType ===
-    "string"
-      ? body.imageMimeType.trim()
-      : "";
-
-  if (
-    imageBase64 ||
-    imageMimeType
-  ) {
     if (
-      !imageBase64 ||
-      !imageMimeType
+      publishedDate &&
+      expirationDate
     ) {
-      return jsonError(
-        "Dados da imagem incompletos.",
-        400
-      );
-    }
 
-    try {
-      imageUrl =
-        await saveImage(
-          imageBase64,
-          imageMimeType
-        );
-    } catch (
-      error
-    ) {
-      console.error(
-        "Erro ao salvar imagem:",
-        error
-      );
-
-      return jsonError(
-        error instanceof Error
-          ? error.message
-          : "Imagem inválida.",
-        400
-      );
-    }
-  }
-
-  // ==========================================================
-  // CRIAR AVISO
-  // ==========================================================
-
-  const aviso: Aviso = {
-    id: Date.now(),
-
-    title,
-
-    message,
-
-    priority,
-
-    createdAt:
-      createdAt.toISOString(),
-
-    publishedDate,
-
-    expirationDate,
-
-    ...(imageUrl
-      ? {
-          imageUrl,
-        }
-      : {}),
-
-    ...(imageAlt
-      ? {
-          imageAlt,
-        }
-      : {}),
-  };
-
-  // ==========================================================
-  // LOG DE DEBUG
-  // ==========================================================
-
-  console.log(
-    "========================================"
-  );
-
-  console.log(
-    "AVISO RECEBIDO"
-  );
-
-  console.log(
-    "Título:",
-    aviso.title
-  );
-
-  console.log(
-    "Publicado ISO:",
-    aviso.publishedDate
-  );
-
-  console.log(
-    "Expiração ISO:",
-    aviso.expirationDate
-  );
-
-  console.log(
-    "Publicado Brasil:",
-    published
-      ? formatDateBrazil(
-          published
-        )
-      : null
-  );
-
-  console.log(
-    "Expiração Brasil:",
-    expiration
-      ? formatDateBrazil(
-          expiration
-        )
-      : null
-  );
-
-  console.log(
-    "========================================"
-  );
-
-  // ==========================================================
-  // SALVAR
-  // ==========================================================
-
-  try {
-    return await enqueue(
-      async () => {
-        const avisos =
-          await readAvisos();
-
-        const novosAvisos =
-          [
-            ...avisos,
-            aviso,
-          ].slice(-50);
-
-        await saveAvisos(
-          novosAvisos
+      const published =
+        parseDate(
+          publishedDate
         );
 
-        console.log(
-          "Aviso salvo:",
-          {
-            id: aviso.id,
-            title: aviso.title,
-            publishedDate:
-              aviso.publishedDate,
-            expirationDate:
-              aviso.expirationDate,
-          }
+      const expiration =
+        parseDate(
+          expirationDate
         );
 
-        return jsonNoCache(
-          aviso,
-          201
+      if (
+        published &&
+        expiration &&
+        expiration.getTime() <=
+          published.getTime()
+      ) {
+
+        return jsonError(
+          "A data de expiração deve ser posterior à publicação.",
+          400
         );
       }
+    }
+
+    const avisos =
+      await readAvisos();
+
+    let imageUrl:
+      | string
+      | undefined;
+
+    /*
+     * ========================================================
+     * IMAGEM BASE64
+     * ========================================================
+     */
+
+    if (
+      typeof body.imageBase64 ===
+      "string" &&
+      body.imageBase64.trim()
+    ) {
+
+      const base64 =
+        body.imageBase64
+          .trim();
+
+      const mimeType =
+        typeof body.imageMimeType ===
+        "string"
+          ? body.imageMimeType
+          : "";
+
+      const extension =
+        imageExtensions[
+          mimeType
+        ];
+
+      if (!extension) {
+
+        return jsonError(
+          "Formato de imagem não suportado.",
+          400
+        );
+      }
+
+      let buffer: Buffer;
+
+      try {
+
+        buffer =
+          Buffer.from(
+            base64,
+            "base64"
+          );
+
+      } catch {
+
+        return jsonError(
+          "Imagem inválida.",
+          400
+        );
+      }
+
+      if (
+        buffer.length >
+        MAX_IMAGE_BYTES
+      ) {
+
+        return jsonError(
+          "Imagem excede o tamanho máximo de 5 MB.",
+          400
+        );
+      }
+
+      await mkdir(
+        uploadsDir,
+        {
+          recursive: true,
+        }
+      );
+
+      const filename =
+        `${Date.now()}-${generateId(avisos)}.${extension}`;
+
+      const imagePath =
+        path.join(
+          uploadsDir,
+          filename
+        );
+
+      await writeFile(
+        imagePath,
+        buffer
+      );
+
+      imageUrl =
+        `/uploads/avisos/${filename}`;
+    }
+
+    /*
+     * ========================================================
+     * NOVO AVISO
+     * ========================================================
+     */
+
+    const novoAviso: Aviso = {
+
+      id:
+        generateId(
+          avisos
+        ),
+
+      title,
+
+      message,
+
+      priority,
+
+      imageUrl,
+
+      imageAlt:
+        typeof body.imageAlt ===
+        "string"
+          ? body.imageAlt.trim()
+          : undefined,
+
+      publishedDate,
+
+      expirationDate,
+
+      createdAt:
+        new Date()
+          .toISOString(),
+
+      active:
+        body.active !== false,
+
+      model:
+        typeof body.model ===
+        "string"
+          ? body.model
+          : "Problema",
+
+      size:
+        typeof body.size ===
+        "string"
+          ? body.size
+          : "Médio",
+
+      icon:
+        typeof body.icon ===
+        "string"
+          ? body.icon
+          : "❕",
+
+      showDates:
+        Boolean(
+          body.showDates
+        ),
+
+      backgroundColor:
+        typeof body.backgroundColor ===
+        "string"
+          ? body.backgroundColor
+          : "0xffffffff",
+
+      textColor:
+        typeof body.textColor ===
+        "string"
+          ? body.textColor
+          : "0x20242aff",
+
+      highlightColor:
+        typeof body.highlightColor ===
+        "string"
+          ? body.highlightColor
+          : "0xf0b90bff",
+
+      pageCentral:
+        body.pageCentral !==
+        false,
+
+      pageLogin:
+        body.pageLogin !==
+        false,
+
+      pageHelpdesk:
+        body.pageHelpdesk !==
+        false,
+
+      closable:
+        body.closable !==
+        false,
+    };
+
+    avisos.push(
+      novoAviso
     );
+
+    await enqueue(
+      () =>
+        saveAvisos(
+          avisos
+        )
+    );
+
+    console.log(
+      "Popup criado:",
+      novoAviso.id,
+      novoAviso.title
+    );
+
+    return jsonNoCache(
+      novoAviso,
+      201
+    );
+
   } catch (
     error
   ) {
+
     console.error(
-      "Erro ao salvar aviso:",
+      "Erro no POST /api/avisos:",
       error
     );
 
     return jsonError(
-      "Não foi possível salvar o aviso.",
+      "Erro ao criar o aviso.",
+      500
+    );
+  }
+}
+
+// ============================================================
+// PATCH
+// ============================================================
+
+export async function PATCH(
+  request: NextRequest
+) {
+
+  if (
+    !checkAuth(
+      request
+    )
+  ) {
+
+    return jsonError(
+      "Não autorizado.",
+      401
+    );
+  }
+
+  try {
+
+    const body =
+      await request.json();
+
+    const {
+      searchParams,
+    } =
+      new URL(
+        request.url
+      );
+
+    const idFromUrl =
+      searchParams.get(
+        "id"
+      );
+
+    const id =
+      Number(
+        body.id ??
+        idFromUrl
+      );
+
+    if (
+      !Number.isInteger(id) ||
+      id <= 0
+    ) {
+
+      return jsonError(
+        "ID do aviso inválido.",
+        400
+      );
+    }
+
+    if (
+      typeof body.active !==
+      "boolean"
+    ) {
+
+      return jsonError(
+        "O campo 'active' deve ser true ou false.",
+        400
+      );
+    }
+
+    const avisos =
+      await readAvisos();
+
+    const index =
+      avisos.findIndex(
+        (
+          aviso
+        ) =>
+          Number(
+            aviso.id
+          ) === id
+      );
+
+    if (
+      index === -1
+    ) {
+
+      return jsonError(
+        "Aviso não encontrado.",
+        404
+      );
+    }
+
+    avisos[index] = {
+      ...avisos[index],
+      active:
+        body.active,
+    };
+
+    await enqueue(
+      () =>
+        saveAvisos(
+          avisos
+        )
+    );
+
+    return jsonNoCache(
+      avisos[index]
+    );
+
+  } catch (
+    error
+  ) {
+
+    console.error(
+      "Erro no PATCH /api/avisos:",
+      error
+    );
+
+    return jsonError(
+      "Erro ao atualizar o aviso.",
+      500
+    );
+  }
+}
+
+// ============================================================
+// DELETE
+// ============================================================
+
+export async function DELETE(
+  request: NextRequest
+) {
+
+  if (
+    !checkAuth(
+      request
+    )
+  ) {
+
+    return jsonError(
+      "Não autorizado.",
+      401
+    );
+  }
+
+  try {
+
+    const {
+      searchParams,
+    } =
+      new URL(
+        request.url
+      );
+
+    let id =
+      Number(
+        searchParams.get(
+          "id"
+        )
+      );
+
+    if (
+      !Number.isInteger(id) ||
+      id <= 0
+    ) {
+
+      try {
+
+        const body =
+          await request.json();
+
+        id =
+          Number(
+            body.id
+          );
+
+      } catch {
+        // ignora
+      }
+    }
+
+    if (
+      !Number.isInteger(id) ||
+      id <= 0
+    ) {
+
+      return jsonError(
+        "ID do aviso inválido.",
+        400
+      );
+    }
+
+    const avisos =
+      await readAvisos();
+
+    const aviso =
+      avisos.find(
+        (
+          item
+        ) =>
+          Number(
+            item.id
+          ) === id
+      );
+
+    if (!aviso) {
+
+      return jsonError(
+        "Aviso não encontrado.",
+        404
+      );
+    }
+
+    const novosAvisos =
+      avisos.filter(
+        (
+          item
+        ) =>
+          Number(
+            item.id
+          ) !== id
+      );
+
+    await enqueue(
+      () =>
+        saveAvisos(
+          novosAvisos
+        )
+    );
+
+    if (
+      aviso.imageUrl &&
+      aviso.imageUrl.startsWith(
+        "/uploads/avisos/"
+      )
+    ) {
+
+      const filename =
+        path.basename(
+          aviso.imageUrl
+        );
+
+      const imagePath =
+        path.join(
+          uploadsDir,
+          filename
+        );
+
+      try {
+
+        await unlink(
+          imagePath
+        );
+
+      } catch {
+        // imagem já removida
+      }
+    }
+
+    return jsonNoCache({
+      success: true,
+
+      message:
+        "Aviso excluído permanentemente.",
+
+      id,
+    });
+
+  } catch (
+    error
+  ) {
+
+    console.error(
+      "Erro no DELETE /api/avisos:",
+      error
+    );
+
+    return jsonError(
+      "Erro ao excluir o aviso.",
       500
     );
   }

@@ -41,6 +41,24 @@ type Aviso = {
   expirationDate?: string;
 
   createdAt?: string;
+
+  active?: boolean;
+
+  model?: string;
+  size?: string;
+  icon?: string;
+
+  showDates?: boolean;
+
+  backgroundColor?: string;
+  textColor?: string;
+  highlightColor?: string;
+
+  pageCentral?: boolean;
+  pageLogin?: boolean;
+  pageHelpdesk?: boolean;
+
+  closable?: boolean;
 };
 
 type PriorityConfig = {
@@ -85,22 +103,6 @@ function isAviso(
 
 // ============================================================
 // PARSE DE DATA
-//
-// IMPORTANTE:
-//
-// Datas enviadas pelo formulário sem timezone:
-//
-// 2026-08-13
-// 2026-08-13T23:59
-// 2026-08-13T23:59:00
-//
-// são tratadas como horário LOCAL.
-//
-// Datas com Z:
-//
-// 2026-08-14T02:59:00.000Z
-//
-// são tratadas como UTC.
 // ============================================================
 
 function parseDate(
@@ -110,128 +112,84 @@ function parseDate(
     return null;
   }
 
-  const texto =
-    value.trim();
+  const texto = value.trim();
 
   if (!texto) {
     return null;
   }
 
-  // ==========================================================
-  // SOMENTE DATA
-  // ==========================================================
-
+  // YYYY-MM-DD
   const somenteData =
     /^(\d{4})-(\d{2})-(\d{2})$/;
 
   const matchData =
-    texto.match(
-      somenteData
-    );
+    texto.match(somenteData);
 
   if (matchData) {
-    const ano =
-      Number(matchData[1]);
+    const ano = Number(matchData[1]);
+    const mes = Number(matchData[2]);
+    const dia = Number(matchData[3]);
 
-    const mes =
-      Number(matchData[2]);
+    const date = new Date(
+      ano,
+      mes - 1,
+      dia,
+      0,
+      0,
+      0,
+      0
+    );
 
-    const dia =
-      Number(matchData[3]);
-
-    const date =
-      new Date(
-        ano,
-        mes - 1,
-        dia,
-        0,
-        0,
-        0,
-        0
-      );
-
-    return Number.isNaN(
-      date.getTime()
-    )
+    return Number.isNaN(date.getTime())
       ? null
       : date;
   }
 
-  // ==========================================================
-  // DATA/HORA LOCAL
-  // ==========================================================
-
+  // YYYY-MM-DDTHH:mm
+  // YYYY-MM-DDTHH:mm:ss
   const dataHoraLocal =
     /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::(\d{2})(?:\.(\d{1,3}))?)?$/;
 
   const matchDataHora =
-    texto.match(
-      dataHoraLocal
-    );
+    texto.match(dataHoraLocal);
 
   if (matchDataHora) {
-    const ano =
-      Number(matchDataHora[1]);
+    const ano = Number(matchDataHora[1]);
+    const mes = Number(matchDataHora[2]);
+    const dia = Number(matchDataHora[3]);
+    const hora = Number(matchDataHora[4]);
+    const minuto = Number(matchDataHora[5]);
+    const segundo = Number(
+      matchDataHora[6] || "0"
+    );
 
-    const mes =
-      Number(matchDataHora[2]);
+    const milissegundo = Number(
+      (
+        matchDataHora[7] || "0"
+      ).padEnd(3, "0")
+    );
 
-    const dia =
-      Number(matchDataHora[3]);
+    const date = new Date(
+      ano,
+      mes - 1,
+      dia,
+      hora,
+      minuto,
+      segundo,
+      milissegundo
+    );
 
-    const hora =
-      Number(matchDataHora[4]);
-
-    const minuto =
-      Number(matchDataHora[5]);
-
-    const segundo =
-      Number(
-        matchDataHora[6] || "0"
-      );
-
-    const milissegundo =
-      Number(
-        (
-          matchDataHora[7] ||
-          "0"
-        ).padEnd(3, "0")
-      );
-
-    const date =
-      new Date(
-        ano,
-        mes - 1,
-        dia,
-        hora,
-        minuto,
-        segundo,
-        milissegundo
-      );
-
-    return Number.isNaN(
-      date.getTime()
-    )
+    return Number.isNaN(date.getTime())
       ? null
       : date;
   }
 
-  // ==========================================================
-  // DATA COM TIMEZONE
-  // ==========================================================
+  // Datas com timezone
+  const date = new Date(texto);
 
-  const date =
-    new Date(texto);
-
-  if (
-    Number.isNaN(
-      date.getTime()
-    )
-  ) {
-    return null;
-  }
-
-  return date;
+  return Number.isNaN(date.getTime())
+    ? null
+    : date;
 }
 
 // ============================================================
@@ -241,9 +199,7 @@ function parseDate(
 function isAvisoExpirado(
   aviso: Aviso
 ): boolean {
-  if (
-    !aviso.expirationDate
-  ) {
+  if (!aviso.expirationDate) {
     return false;
   }
 
@@ -269,9 +225,7 @@ function isAvisoExpirado(
 function isAvisoNaoPublicado(
   aviso: Aviso
 ): boolean {
-  if (
-    !aviso.publishedDate
-  ) {
+  if (!aviso.publishedDate) {
     return false;
   }
 
@@ -292,8 +246,6 @@ function isAvisoNaoPublicado(
 
 // ============================================================
 // FORMATAR DATA
-//
-// NÃO CONVERTE DATA LOCAL PARA UTC.
 // ============================================================
 
 function formatarData(
@@ -303,16 +255,11 @@ function formatarData(
     return "";
   }
 
-  const texto =
-    value.trim();
+  const texto = value.trim();
 
   if (!texto) {
     return "";
   }
-
-  // ==========================================================
-  // YYYY-MM-DD
-  // ==========================================================
 
   const somenteData =
     texto.match(
@@ -323,49 +270,18 @@ function formatarData(
     return `${somenteData[3]}/${somenteData[2]}/${somenteData[1]}`;
   }
 
-  // ==========================================================
-  // YYYY-MM-DDTHH:mm
-  // YYYY-MM-DDTHH:mm:ss
-  // ==========================================================
-
   const dataHora =
     texto.match(
       /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::(\d{2}))?/
     );
 
   if (dataHora) {
-    const ano =
-      dataHora[1];
-
-    const mes =
-      dataHora[2];
-
-    const dia =
-      dataHora[3];
-
-    const hora =
-      dataHora[4];
-
-    const minuto =
-      dataHora[5];
-
-    return `${dia}/${mes}/${ano} ${hora}:${minuto}`;
+    return `${dataHora[3]}/${dataHora[2]}/${dataHora[1]} ${dataHora[4]}:${dataHora[5]}`;
   }
 
-  // ==========================================================
-  // ISO COM Z
-  //
-  // Aqui existe timezone explícito.
-  // ==========================================================
+  const date = new Date(texto);
 
-  const date =
-    new Date(texto);
-
-  if (
-    Number.isNaN(
-      date.getTime()
-    )
-  ) {
+  if (Number.isNaN(date.getTime())) {
     return texto;
   }
 
@@ -403,7 +319,7 @@ export function PopupAvisos() {
     useRef(false);
 
   // ==========================================================
-  // PRIORIDADES
+  // CONFIGURAÇÕES
   // ==========================================================
 
   const priorityConfigs:
@@ -421,14 +337,11 @@ export function PopupAvisos() {
         />
       ),
 
-      bgColor:
-        "bg-red-50",
+      bgColor: "bg-red-50",
 
-      badgeColor:
-        "bg-red-600",
+      badgeColor: "bg-red-600",
 
-      badgeText:
-        "text-white",
+      badgeText: "text-white",
 
       headerGradient:
         "from-red-700 to-red-800",
@@ -454,14 +367,11 @@ export function PopupAvisos() {
         />
       ),
 
-      bgColor:
-        "bg-amber-50",
+      bgColor: "bg-amber-50",
 
-      badgeColor:
-        "bg-amber-600",
+      badgeColor: "bg-amber-600",
 
-      badgeText:
-        "text-white",
+      badgeText: "text-white",
 
       headerGradient:
         "from-amber-700 to-amber-800",
@@ -487,14 +397,11 @@ export function PopupAvisos() {
         />
       ),
 
-      bgColor:
-        "bg-blue-50",
+      bgColor: "bg-blue-50",
 
-      badgeColor:
-        "bg-blue-600",
+      badgeColor: "bg-blue-600",
 
-      badgeText:
-        "text-white",
+      badgeText: "text-white",
 
       headerGradient:
         "from-blue-700 to-blue-800",
@@ -518,19 +425,26 @@ export function PopupAvisos() {
   const carregarAviso =
     useCallback(
       async () => {
-        if (
-          buscandoRef.current
-        ) {
+        if (buscandoRef.current) {
           return;
         }
 
-        buscandoRef.current =
-          true;
+        buscandoRef.current = true;
 
         try {
+          /*
+           * IMPORTANTE:
+           *
+           * A rota retorna ARRAY.
+           *
+           * Usamos ?public=true para o
+           * backend já devolver somente
+           * avisos que podem aparecer.
+           */
+
           const response =
             await fetch(
-              `/api/avisos?_=${Date.now()}`,
+              `/api/avisos?public=true&_=${Date.now()}`,
               {
                 method: "GET",
                 cache: "no-store",
@@ -545,9 +459,12 @@ export function PopupAvisos() {
               }
             );
 
-          if (
-            !response.ok
-          ) {
+          if (!response.ok) {
+            console.error(
+              "Erro HTTP ao buscar avisos:",
+              response.status
+            );
+
             return;
           }
 
@@ -555,12 +472,69 @@ export function PopupAvisos() {
             await response.json();
 
           // ==================================================
-          // SEM AVISO
+          // A ROTA RETORNA ARRAY
+          // ==================================================
+
+          if (!Array.isArray(value)) {
+            console.error(
+              "A API /api/avisos não retornou um array:",
+              value
+            );
+
+            setAviso(null);
+            setIsVisible(false);
+
+            return;
+          }
+
+          // ==================================================
+          // FILTRAR AVISOS VÁLIDOS
+          // ==================================================
+
+          const avisosValidos =
+            value.filter(isAviso);
+
+          // ==================================================
+          // FILTRAR ACTIVE
+          // ==================================================
+
+          const avisosAtivos =
+            avisosValidos.filter(
+              (item) =>
+                item.active !== false
+            );
+
+          // ==================================================
+          // FILTRAR PUBLICAÇÃO
+          // ==================================================
+
+          const avisosPublicados =
+            avisosAtivos.filter(
+              (item) =>
+                !isAvisoNaoPublicado(
+                  item
+                )
+            );
+
+          // ==================================================
+          // FILTRAR EXPIRAÇÃO
+          // ==================================================
+
+          const avisosDisponiveis =
+            avisosPublicados.filter(
+              (item) =>
+                !isAvisoExpirado(
+                  item
+                )
+            );
+
+          // ==================================================
+          // NENHUM AVISO
           // ==================================================
 
           if (
-            value === null ||
-            !isAviso(value)
+            avisosDisponiveis.length ===
+            0
           ) {
             setAviso(null);
             setIsVisible(false);
@@ -572,37 +546,38 @@ export function PopupAvisos() {
           }
 
           // ==================================================
-          // NÃO PUBLICADO
+          // ORDENAR
+          //
+          // Mais recente primeiro
           // ==================================================
 
-          if (
-            isAvisoNaoPublicado(
-              value
-            )
-          ) {
-            setAviso(null);
-            setIsVisible(false);
+          const ordenados =
+            [...avisosDisponiveis].sort(
+              (a, b) => {
+                const dataA =
+                  a.createdAt
+                    ? new Date(
+                        a.createdAt
+                      ).getTime()
+                    : 0;
 
-            return;
-          }
+                const dataB =
+                  b.createdAt
+                    ? new Date(
+                        b.createdAt
+                      ).getTime()
+                    : 0;
+
+                return dataB - dataA;
+              }
+            );
 
           // ==================================================
-          // EXPIRADO
+          // PEGA O PRIMEIRO AVISO
           // ==================================================
 
-          if (
-            isAvisoExpirado(
-              value
-            )
-          ) {
-            setAviso(null);
-            setIsVisible(false);
-
-            avisoAtualIdRef.current =
-              null;
-
-            return;
-          }
+          const novoAviso =
+            ordenados[0];
 
           // ==================================================
           // AVISO FECHADO
@@ -610,19 +585,13 @@ export function PopupAvisos() {
 
           if (
             avisoFechadoIdRef.current ===
-            value.id
+            novoAviso.id
           ) {
-            if (
-              avisoAtualIdRef.current !==
-              value.id
-            ) {
-              setAviso(value);
-
-              avisoAtualIdRef.current =
-                value.id;
-            }
-
+            setAviso(novoAviso);
             setIsVisible(false);
+
+            avisoAtualIdRef.current =
+              novoAviso.id;
 
             return;
           }
@@ -633,28 +602,32 @@ export function PopupAvisos() {
 
           if (
             avisoAtualIdRef.current ===
-            value.id
+            novoAviso.id
           ) {
             return;
           }
 
           // ==================================================
           // NOVO AVISO
-          // ==========================================================
+          // ==================================================
 
           avisoAtualIdRef.current =
-            value.id;
+            novoAviso.id;
 
           avisoFechadoIdRef.current =
             null;
 
-          setAviso(value);
+          setAviso(novoAviso);
+
           setIsVisible(true);
-        } catch (
-          error
-        ) {
+
+          console.log(
+            "Popup carregado:",
+            novoAviso
+          );
+        } catch (error) {
           console.error(
-            "Erro ao carregar aviso:",
+            "Erro ao carregar popup:",
             error
           );
         } finally {
@@ -677,7 +650,7 @@ export function PopupAvisos() {
         () => {
           void carregarAviso();
         },
-        30000
+        10000
       );
 
     return () => {
@@ -699,6 +672,12 @@ export function PopupAvisos() {
         return;
       }
 
+      if (
+        aviso.closable === false
+      ) {
+        return;
+      }
+
       avisoFechadoIdRef.current =
         aviso.id;
 
@@ -717,8 +696,7 @@ export function PopupAvisos() {
     const handleKeyDown =
       (event: KeyboardEvent) => {
         if (
-          event.key ===
-          "Escape"
+          event.key === "Escape"
         ) {
           close();
         }
@@ -773,9 +751,7 @@ export function PopupAvisos() {
         /\[IMAGEM\]|\[FOTO\]|\[IMAGE\]/i;
 
       if (
-        imageMarker.test(
-          message
-        )
+        imageMarker.test(message)
       ) {
         const parts =
           message.split(
@@ -783,15 +759,13 @@ export function PopupAvisos() {
           );
 
         const before =
-          parts[0]?.trim() ||
-          "";
+          parts[0]?.trim() || "";
 
         const after =
           parts
             .slice(1)
             .join("")
-            .trim() ||
-          "";
+            .trim() || "";
 
         return (
           <>
@@ -807,9 +781,7 @@ export function PopupAvisos() {
                 alt={imageAlt}
                 className="h-auto max-h-80 w-full object-cover"
                 loading="lazy"
-                onError={(
-                  event
-                ) => {
+                onError={(event) => {
                   event.currentTarget.style.display =
                     "none";
                 }}
@@ -843,9 +815,7 @@ export function PopupAvisos() {
               alt={imageAlt}
               className="h-auto max-h-80 w-full object-cover"
               loading="lazy"
-              onError={(
-                event
-              ) => {
+              onError={(event) => {
                 event.currentTarget.style.display =
                   "none";
               }}
@@ -869,6 +839,10 @@ export function PopupAvisos() {
     return null;
   }
 
+  if (!isVisible) {
+    return null;
+  }
+
   const config =
     priorityConfigs[
       aviso.priority
@@ -882,13 +856,11 @@ export function PopupAvisos() {
     <AnimatePresence>
       {isVisible && (
         <div
-          className="fixed inset-0 z-[100] grid place-items-center bg-black/60 p-4 backdrop-blur-[2px]"
+          className="fixed inset-0 z-[9999] grid place-items-center bg-black/60 p-4 backdrop-blur-[2px]"
           role="dialog"
           aria-modal="true"
           aria-labelledby="aviso-title"
-          onClick={(
-            event
-          ) => {
+          onClick={(event) => {
             if (
               event.target ===
               event.currentTarget
@@ -952,17 +924,19 @@ export function PopupAvisos() {
                 </div>
               </div>
 
-              <button
-                type="button"
-                onClick={close}
-                className="ml-4 shrink-0 rounded-md p-2 text-white/70 transition-colors hover:bg-white/10 hover:text-white"
-                aria-label="Fechar aviso"
-              >
-                <X
-                  className="size-6"
-                  strokeWidth={2}
-                />
-              </button>
+              {aviso.closable !== false && (
+                <button
+                  type="button"
+                  onClick={close}
+                  className="ml-4 shrink-0 rounded-md p-2 text-white/70 transition-colors hover:bg-white/10 hover:text-white"
+                  aria-label="Fechar aviso"
+                >
+                  <X
+                    className="size-6"
+                    strokeWidth={2}
+                  />
+                </button>
+              )}
             </div>
 
             {/* CONTEÚDO */}
@@ -1021,15 +995,17 @@ export function PopupAvisos() {
 
               {/* BOTÃO */}
 
-              <div className="mt-6 flex justify-end border-t border-gray-200 pt-5">
-                <button
-                  type="button"
-                  onClick={close}
-                  className="rounded-lg px-5 py-2.5 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900"
-                >
-                  Fechar
-                </button>
-              </div>
+              {aviso.closable !== false && (
+                <div className="mt-6 flex justify-end border-t border-gray-200 pt-5">
+                  <button
+                    type="button"
+                    onClick={close}
+                    className="rounded-lg px-5 py-2.5 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900"
+                  >
+                    Fechar
+                  </button>
+                </div>
+              )}
             </div>
 
             {/* INDICADOR */}
