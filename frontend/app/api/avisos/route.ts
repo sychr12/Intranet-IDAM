@@ -107,6 +107,7 @@ const imageExtensions: Record<
   "image/png": "png",
   "image/gif": "gif",
   "image/webp": "webp",
+  "image/mp4": "mp4",
 };
 
 // ============================================================
