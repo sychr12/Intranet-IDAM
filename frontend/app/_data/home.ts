@@ -148,6 +148,7 @@ export const departmentMeta: Record<
 // Links externos organizados pelas abas PJ, RH e SGC.
 export const departmentLinks: Record<DepartmentKey, LinkItem[]> = {
   PJ: [
+    { title: "Diário Oficial", icon: Newspaper, href: "https://diario.imprensaoficial.am.gov.br/" },
     { title: "Diário MP AM", icon: Newspaper, href: "https://diario.mpam.mp.br/pages/home.jsf" },
     { title: "Comunica PJE", icon: FileText, href: "https://comunica.pje.jus.br/" },
     { title: "Doe TCE", icon: ClipboardList, href: "https://doe.tce.am.gov.br/" },

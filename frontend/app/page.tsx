@@ -5,7 +5,6 @@ import { motion, type Variants } from "framer-motion";
 import { MiniCalendar, Notices } from "./_components/calendar-widgets";
 import { DailyMessageCard } from "./_components/daily-message-card";
 import { Footer } from "./_components/footer";
-import { ShellCard } from "./_components/shell-card";
 import {
   BannerCarousel,
   DepartmentHub,
