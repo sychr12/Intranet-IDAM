@@ -3,6 +3,7 @@ import { Geist } from "next/font/google";
 import "./globals.css";
 import { PopupAvisos } from "./_components/popup-avisos";
 import { VisitTracker } from "./_components/visit-tracker";
+import { NotificationPermission } from "./_components/notification-permission";
 
 // Fonte carregada pelo Next.js e exposta ao tema global por variável CSS.
 const geistSans = Geist({
@@ -27,6 +28,7 @@ export default function RootLayout({
         {children}
         <VisitTracker />
         <PopupAvisos />
+        <NotificationPermission />
       </body>
     </html>
   );

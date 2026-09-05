@@ -30,10 +30,13 @@
     "allowJs": true
   },
   "include": [
-    "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
-    ".next/types/**/*.ts"
+    ".next-verify-final/types/**/*.ts",
+    ".next-verify/types/**/*.ts",
+    ".next/types/**/*.ts",
+    "next-env.d.ts",
+    ".next-media-verify/types/**/*.ts"
   ],
   "exclude": [
     "node_modules"

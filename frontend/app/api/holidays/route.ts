@@ -32,7 +32,7 @@ export async function GET(request: NextRequest) {
   try {
     const response = await fetch(
       `https://brasilapi.com.br/api/feriados/v1/${year}`,
-      { next: { revalidate: 86400 } },
+      { next: { revalidate: 86400 }, signal: AbortSignal.timeout(5000) },
     );
 
     if (!response.ok) throw new Error(`BrasilAPI respondeu ${response.status}`);

@@ -32,6 +32,12 @@ a:focus-visible {
   outline-offset: 3px;
 }
 
+/* O fechar do popup usa foco próprio para não criar uma borda verde no cabeçalho. */
+.popup-close:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.8);
+  outline-offset: 2px;
+}
+
 /* Destaque temporário ao rolar para uma seção */
 .flash-highlight {
   animation: flash-highlight 1.2s ease-in-out;

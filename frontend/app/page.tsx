@@ -11,8 +11,6 @@ import {
   QuickAccess,
 } from "./_components/home-dashboard";
 import { Header, Sidebar } from "./_components/navigation";
-import { PopupAvisos } from "./_components/popup-avisos";
-import { VisitTracker } from "./_components/visit-tracker";
 import type { DepartmentKey } from "./_data/home";
 import { useHolidays } from "./_hooks/use-holidays";
 
@@ -50,8 +48,6 @@ export default function Page() {
 
   return (
     <div className="min-h-screen bg-[#f7f8f5] text-[#111d16]">
-      <VisitTracker />
-      <PopupAvisos />
       <Header
         onToggleMenu={() => {
           if (window.matchMedia("(min-width: 1024px)").matches) {
@@ -65,6 +61,8 @@ export default function Page() {
       <button
         onClick={() => setSidebarOpen(false)}
         aria-label="Fechar menu"
+        tabIndex={sidebarOpen ? 0 : -1}
+        aria-hidden={!sidebarOpen}
         className={`fixed inset-0 z-[60] bg-[#001b10]/55 backdrop-blur-[2px] transition-opacity lg:hidden ${sidebarOpen ? "opacity-100" : "pointer-events-none opacity-0"}`}
       />
 

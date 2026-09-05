@@ -1,3 +1,18 @@
 {
-
+  "d01b5b0c-ed4e-4b70-bf31-1dfe4adca44d": {
+    "primeiraVez": "2026-09-05T19:21:33.470Z",
+    "ultimaVez": "2026-09-05T19:29:20.542Z",
+    "pagina": "/",
+    "navegador": "Microsoft Edge",
+    "nome": "Visitante",
+    "departamento": "Não informado"
+  },
+  "d985a5dc-185e-4e48-82ce-9658cd9efba7": {
+    "primeiraVez": "2026-09-05T19:28:59.533Z",
+    "ultimaVez": "2026-09-05T19:28:59.533Z",
+    "pagina": "/",
+    "navegador": "Google Chrome",
+    "nome": "Visitante",
+    "departamento": "Não informado"
+  }
 }

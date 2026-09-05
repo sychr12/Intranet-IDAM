@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element -- Uploaded media is served directly without Next image optimization. */
 "use client";
 
 import {
@@ -8,6 +9,9 @@ import {
   type ReactNode,
 } from "react";
 
+import { parseAvisoDate, safeLink } from "../_lib/aviso-contract";
+import { useModalFocus } from "../_hooks/use-modal-focus";
+import { createPortal } from "react-dom";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 
 import {
@@ -21,7 +25,6 @@ import {
   Calendar,
   Clock,
   ExternalLink,
-  Bell,
   CheckCircle,
 } from "lucide-react";
 
@@ -31,6 +34,22 @@ import {
 
 const POLL_INTERVAL_MS = 10000;
 const AVISOS_ENDPOINT = "/api/avisos?public=true";
+
+function enviarNotificacao(aviso: Pick<Aviso, "id" | "title" | "message">) {
+  if (typeof window === "undefined" || !("Notification" in window)) return;
+  if (Notification.permission !== "granted") return;
+  try {
+    const notification = new Notification(aviso.title || "Novo aviso da Intranet", {
+      body: aviso.message || "Você recebeu uma nova comunicação.",
+      tag: `intranet-aviso-${aviso.id}`,
+      icon: "/favicon.ico",
+      requireInteraction: true,
+    });
+    notification.onclick = () => { window.focus(); notification.close(); };
+  } catch (error) {
+    console.error("Não foi possível enviar a notificação do Windows:", error);
+  }
+}
 
 // ============================================================
 // TIPOS
@@ -43,7 +62,9 @@ type Aviso = {
   title: string;
   message: string;
   priority: Priority;
+  criticality?: string;
   imageUrl?: string;
+  imageMimeType?: string;
   imageAlt?: string;
   publishedDate?: string;
   expirationDate?: string;
@@ -110,6 +131,43 @@ const PRIORITY_CONFIGS: Record<Priority, PriorityConfig> = {
   },
 };
 
+function priorityForAviso(aviso: Aviso): Priority {
+  const criticality = (aviso.criticality || "").toLowerCase();
+  if (["crítica", "critica", "critical"].includes(criticality)) return "urgente";
+  if (["alta", "high", "moderada", "moderate"].includes(criticality)) return "importante";
+  if (["baixa", "low", "informativa", "informative"].includes(criticality)) return "normal";
+  return aviso.priority;
+}
+
+function configForAviso(aviso: Aviso): PriorityConfig {
+  const criticality = (aviso.criticality || "").toLowerCase();
+  const base = PRIORITY_CONFIGS[priorityForAviso(aviso)];
+  if (["baixa", "low"].includes(criticality)) {
+    return { ...base, bgLight: "bg-emerald-50/80", borderColor: "border-emerald-600", headerBg: "bg-emerald-700", shadowColor: "rgba(22,112,71,0.15)", dotColor: "bg-emerald-600", badgeBg: "bg-emerald-600", hoverBg: "hover:bg-emerald-50" };
+  }
+  if (["moderada", "moderate"].includes(criticality)) {
+    return { ...base, bgLight: "bg-amber-50/80", borderColor: "border-amber-600", headerBg: "bg-amber-700", shadowColor: "rgba(148,98,0,0.15)", dotColor: "bg-amber-700", badgeBg: "bg-amber-700", hoverBg: "hover:bg-amber-50" };
+  }
+  if (["alta", "high"].includes(criticality)) {
+    return { ...base, bgLight: "bg-orange-50/80", borderColor: "border-orange-600", headerBg: "bg-orange-700", shadowColor: "rgba(180,83,9,0.15)", dotColor: "bg-orange-600", badgeBg: "bg-orange-600", hoverBg: "hover:bg-orange-50" };
+  }
+  return base;
+}
+
+function textoCriticidade(value?: string): string {
+  const normalizado = (value || "informativa").toLowerCase();
+  const labels: Record<string, string> = {
+    informative: "Informativa", informativa: "Informativa", low: "Baixa", baixa: "Baixa",
+    moderate: "Moderada", moderada: "Moderada", high: "Alta", alta: "Alta",
+    critical: "Crítica", critica: "Crítica", "crítica": "Crítica",
+  };
+  return labels[normalizado] || "Informativa";
+}
+
+function textoPrioridade(value: Priority): string {
+  return value === "urgente" ? "Urgente" : value === "importante" ? "Alta" : "Normal";
+}
+
 // ============================================================
 // VALIDAR AVISO
 // ============================================================
@@ -131,42 +189,7 @@ function isAviso(value: unknown): value is Aviso {
 // PARSE DE DATA
 // ============================================================
 
-function parseDate(value?: string): Date | null {
-  if (!value) return null;
-  const texto = value.trim();
-  if (!texto) return null;
-
-  const somenteData = /^(\d{4})-(\d{2})-(\d{2})$/;
-  const matchData = texto.match(somenteData);
-  if (matchData) {
-    const date = new Date(
-      Number(matchData[1]),
-      Number(matchData[2]) - 1,
-      Number(matchData[3]),
-      0, 0, 0, 0
-    );
-    return Number.isNaN(date.getTime()) ? null : date;
-  }
-
-  const dataHoraLocal =
-    /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::(\d{2})(?:\.(\d{1,3}))?)?$/;
-  const matchDataHora = texto.match(dataHoraLocal);
-  if (matchDataHora) {
-    const date = new Date(
-      Number(matchDataHora[1]),
-      Number(matchDataHora[2]) - 1,
-      Number(matchDataHora[3]),
-      Number(matchDataHora[4]),
-      Number(matchDataHora[5]),
-      Number(matchDataHora[6] || "0"),
-      Number((matchDataHora[7] || "0").padEnd(3, "0"))
-    );
-    return Number.isNaN(date.getTime()) ? null : date;
-  }
-
-  const date = new Date(texto);
-  return Number.isNaN(date.getTime()) ? null : date;
-}
+const parseDate = parseAvisoDate;
 
 // ============================================================
 // EXPIRAÇÃO / PUBLICAÇÃO
@@ -223,16 +246,23 @@ function formatarData(value?: string): string {
 
 function AvisoImage({
   imageUrl,
+  imageMimeType,
   imageAlt,
   caption,
 }: {
   imageUrl: string;
+  imageMimeType?: string;
   imageAlt: string;
   caption?: string;
 }) {
   const [hasError, setHasError] = useState(false);
 
-  if (hasError) return null;
+  if (hasError) return <p className="text-sm text-gray-500">Não foi possível carregar o anexo.</p>;
+  const mediaType = imageUrl.toLowerCase();
+  const mime = (imageMimeType || "").toLowerCase();
+  if (mime === "application/pdf" || imageUrl.startsWith("data:application/pdf") || mediaType.includes(".pdf")) return <iframe title={imageAlt} src={imageUrl} className="h-[60vh] min-h-80 w-full rounded border-0" />;
+  if (mime.startsWith("video/") || /\.(mp4|webm|ogv|mov)(\?|$)/i.test(mediaType) || imageUrl.startsWith("data:video/")) return <video className="max-h-[60vh] w-full rounded bg-black" controls playsInline preload="metadata" onError={() => setHasError(true)}><source src={imageUrl} type={imageMimeType} /></video>;
+  if (mime.startsWith("audio/") || /\.(mp3|ogg|wav)(\?|$)/i.test(mediaType) || imageUrl.startsWith("data:audio/")) return <audio className="w-full" controls preload="metadata" onError={() => setHasError(true)}><source src={imageUrl} type={imageMimeType} /></audio>;
 
   return (
     <div className="my-3 overflow-hidden rounded-lg border border-gray-200 bg-gray-50">
@@ -265,8 +295,10 @@ export function PopupAvisos() {
   const avisosRef = useRef<Aviso[]>([]);
   const currentIndexRef = useRef(0);
   const buscandoRef = useRef(false);
+  const notificacoesInicializadasRef = useRef(false);
   const closeButtonRef = useRef<HTMLButtonElement | null>(null);
 
+  const dialogRef = useRef<HTMLDivElement>(null);
   const prefersReducedMotion = useReducedMotion();
 
   useEffect(() => {
@@ -330,6 +362,9 @@ export function PopupAvisos() {
         setAvisos([]);
         setIsVisible(false);
         setCurrentIndex(0);
+        // Mesmo sem avisos, a página já foi sincronizada. Assim, o próximo
+        // aviso criado será reconhecido como novo e disparará a notificação.
+        notificacoesInicializadasRef.current = true;
         return;
       }
 
@@ -340,6 +375,16 @@ export function PopupAvisos() {
         idsAnteriores.some((id, index) => id !== idsNovos[index]);
 
       setAvisos(avisosOrdenados);
+
+      // O primeiro carregamento apenas sincroniza os avisos existentes. Depois
+      // disso, cada aviso novo também gera uma notificação nativa do Windows
+      // pelo Chrome/Edge, desde que o usuário tenha concedido permissão.
+      if (notificacoesInicializadasRef.current) {
+        const idsAnterioresSet = new Set(idsAnteriores);
+        const novos = avisosOrdenados.filter((item) => !idsAnterioresSet.has(item.id));
+        novos.forEach(enviarNotificacao);
+      }
+      notificacoesInicializadasRef.current = true;
 
       if (!listaMudou) {
         return;
@@ -357,6 +402,13 @@ export function PopupAvisos() {
     } finally {
       buscandoRef.current = false;
     }
+  }, []);
+
+  useEffect(() => {
+    if (typeof Notification === "undefined" || Notification.permission !== "default") return;
+    const solicitar = () => { void Notification.requestPermission(); };
+    window.addEventListener("pointerdown", solicitar, { once: true });
+    return () => window.removeEventListener("pointerdown", solicitar);
   }, []);
 
   // ==========================================================
@@ -425,9 +477,6 @@ export function PopupAvisos() {
   // FECHAR
   // ==========================================================
 
-  const fecharPopup = useCallback(() => {
-    setIsVisible(false);
-  }, []);
 
   const handleClose = useCallback(() => {
     const avisoAtual = avisosRef.current[currentIndexRef.current];
@@ -460,15 +509,7 @@ export function PopupAvisos() {
   useEffect(() => {
     if (!isVisible) return;
 
-    setTimeout(() => {
-      closeButtonRef.current?.focus();
-    }, 100);
-
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        fecharPopup();
-        return;
-      }
 
       if (avisosRef.current.length <= 1) return;
 
@@ -485,7 +526,9 @@ export function PopupAvisos() {
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [isVisible, fecharPopup, irParaAnterior, irParaProximo]);
+  }, [isVisible, handleClose, irParaAnterior, irParaProximo]);
+
+  useModalFocus(isVisible && avisos.length > 0, dialogRef, handleClose);
 
   const aviso = avisos[currentIndex] ?? null;
   const temMultiplosAvisos = avisos.length > 1;
@@ -503,7 +546,7 @@ export function PopupAvisos() {
     // Se não tem imagem, mostra só a mensagem
     if (!imageUrl) {
       return (
-        <p className="break-words text-sm leading-relaxed text-gray-700">
+        <p className="whitespace-pre-wrap break-words text-sm leading-relaxed text-gray-700">
           {message}
         </p>
       );
@@ -526,6 +569,7 @@ export function PopupAvisos() {
 
           <AvisoImage
             imageUrl={imageUrl}
+            imageMimeType={aviso.imageMimeType}
             imageAlt={imageAlt}
             caption={aviso.imageAlt}
           />
@@ -547,6 +591,7 @@ export function PopupAvisos() {
         </p>
         <AvisoImage
           imageUrl={imageUrl}
+          imageMimeType={aviso.imageMimeType}
           imageAlt={imageAlt}
           caption={aviso.imageAlt}
         />
@@ -560,24 +605,26 @@ export function PopupAvisos() {
 
   if (!aviso || !isVisible) return null;
 
-  const config = PRIORITY_CONFIGS[aviso.priority];
+  const config = configForAviso(aviso);
   const isClosable = aviso.closable !== false;
 
   // ==========================================================
   // POPUP
   // ==========================================================
 
-  return (
+  return createPortal(
     <AnimatePresence>
       {isVisible && (
         <div
           className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 p-4"
+          ref={dialogRef}
+          tabIndex={-1}
           role="dialog"
           aria-modal="true"
           aria-labelledby="aviso-title"
           onClick={(event) => {
             if (event.target === event.currentTarget && isClosable) {
-              fecharPopup();
+              handleClose();
             }
           }}
         >
@@ -599,7 +646,7 @@ export function PopupAvisos() {
                 : { opacity: 0, y: -20 }
             }
             transition={{ duration: 0.25, ease: "easeOut" }}
-            className="relative w-full max-w-2xl overflow-hidden rounded-lg bg-white shadow-xl"
+            className="relative max-h-[90dvh] w-full max-w-2xl overflow-y-auto rounded-lg bg-white shadow-xl"
             style={{
               boxShadow: `0 20px 60px -12px ${config.shadowColor}`,
             }}
@@ -657,7 +704,7 @@ export function PopupAvisos() {
                       <span
                         className={`inline-flex items-center gap-1 rounded ${config.badgeBg} px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider ${config.badgeText}`}
                       >
-                        {config.label}
+                        {textoCriticidade(aviso.criticality)} - {textoPrioridade(aviso.priority)}
                       </span>
                       <span className="flex items-center gap-1 text-xs text-white/60">
                         <CheckCircle className="size-3" strokeWidth={1.5} />
@@ -671,8 +718,8 @@ export function PopupAvisos() {
                   <button
                     ref={closeButtonRef}
                     type="button"
-                    onClick={fecharPopup}
-                    className="shrink-0 rounded p-1 text-white/50 transition-colors hover:bg-white/10 hover:text-white"
+                    onClick={handleClose}
+                    className="popup-close shrink-0 rounded p-1 text-white/50 transition-colors hover:bg-white/10 hover:text-white"
                     aria-label="Fechar"
                   >
                     <X className="size-4" strokeWidth={2} />
@@ -694,9 +741,9 @@ export function PopupAvisos() {
                   <div className="min-w-0 flex-1 space-y-2">
                     {renderMessageWithImage()}
 
-                    {aviso.link && (
+                    {safeLink(aviso.link) && (
                       <a
-                        href={aviso.link}
+                        href={safeLink(aviso.link)}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="inline-flex items-center gap-1.5 text-sm font-medium text-blue-600 transition-colors hover:text-blue-700"
@@ -777,6 +824,6 @@ export function PopupAvisos() {
           </motion.section>
         </div>
       )}
-    </AnimatePresence>
+    </AnimatePresence>, document.body
   );
 }

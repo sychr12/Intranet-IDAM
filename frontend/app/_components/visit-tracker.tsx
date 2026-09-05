@@ -85,18 +85,13 @@ export function VisitTracker() {
     // RECUPERAR OU CRIAR SESSÃO
     // ============================================================
 
-    let sessionId =
-      localStorage.getItem(
-        storageKey
-      );
+    let sessionId: string | null = null;
+    try { sessionId = localStorage.getItem(storageKey); } catch { /* Storage can be disabled. */ }
 
     if (!sessionId) {
       sessionId = generateUUID();
 
-      localStorage.setItem(
-        storageKey,
-        sessionId
-      );
+      try { localStorage.setItem(storageKey, sessionId); } catch { /* Use the in-memory session. */ }
     }
 
     // ============================================================
@@ -114,6 +109,10 @@ export function VisitTracker() {
 
         body: JSON.stringify({
           sessionId,
+          pagina: window.location.pathname,
+          navegador: navigator.userAgent,
+          nome: "Visitante",
+          departamento: "Não informado",
         }),
 
         keepalive: true,

@@ -56,8 +56,8 @@ export const headerLinks: LinkItem[] = [
 // Atalhos rápidos exibidos no cabeçalho (seção superior): links internos e seções da intranet
 export const headerShortcuts: LinkItem[] = [
   { title: "Calendário", icon: CalendarDays, href: "/#calendar" },
-  { title: "Agenda", icon: ClipboardList, href: "/agenda" },
-  { title: "Mensagens", icon: MessageCircleHeart, href: "/mensagens" },
+  { title: "Agenda", icon: ClipboardList, href: "/#agenda" },
+  { title: "Mensagens", icon: MessageCircleHeart, href: "/#mensagens" },
 ];
 
 // Áreas internas da intranet — usadas pelo menu de atalhos no cabeçalho

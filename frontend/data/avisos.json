@@ -1,3 +1,46 @@
 [
-
+  {
+    "id": 1,
+    "title": "ola",
+    "message": "ola",
+    "priority": "normal",
+    "criticality": "informative",
+    "imageUrl": "/uploads/avisos/1788636571720-1.pdf",
+    "imageMimeType": "application/pdf",
+    "createdAt": "2026-09-05T19:29:31.721Z",
+    "active": true,
+    "model": "Problema",
+    "size": "Médio",
+    "icon": "❕",
+    "showDates": false,
+    "backgroundColor": "0xffffffff",
+    "textColor": "0x20242aff",
+    "highlightColor": "0xf0b90bff",
+    "pageCentral": true,
+    "pageLogin": true,
+    "pageHelpdesk": true,
+    "closable": true
+  },
+  {
+    "id": 2,
+    "title": "ola",
+    "message": "ola",
+    "priority": "normal",
+    "criticality": "informative",
+    "imageUrl": "/uploads/avisos/1788636586623-2.gif",
+    "imageMimeType": "image/gif",
+    "createdAt": "2026-09-05T19:29:46.624Z",
+    "active": true,
+    "model": "Problema",
+    "size": "Médio",
+    "icon": "❕",
+    "showDates": false,
+    "backgroundColor": "0xffffffff",
+    "textColor": "0x20242aff",
+    "highlightColor": "0xf0b90bff",
+    "pageCentral": true,
+    "pageLogin": true,
+    "pageHelpdesk": true,
+    "closable": true
+  }
 ]

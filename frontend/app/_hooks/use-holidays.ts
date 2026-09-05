@@ -19,6 +19,7 @@ export function useHolidays(startYear: number, endYear = startYear) {
     async function loadHolidays() {
       setLoading(true);
       setUnavailable(false);
+      setHolidays([]);
 
       try {
         const years = Array.from(

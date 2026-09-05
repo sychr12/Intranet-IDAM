@@ -1,172 +1,63 @@
-import { NextResponse } from "next/server";
-import fs from "fs";
-import path from "path";
-
-const filePath = path.join(
-  process.cwd(),
-  "data",
-  "daily-message.json"
-);
-
+import { NextRequest, NextResponse } from "next/server";
+import { existsSync, readFileSync, mkdirSync, writeFileSync, renameSync } from "node:fs";
+import path from "node:path";
+import { checkAuth } from "../../_lib/avisos-api";
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+const filePath = path.join(process.cwd(), process.env.INTRANET_DATA_DIR || "data", "daily-message.json");
 function readMessages(): string[] {
-  try {
-    if (!fs.existsSync(filePath)) {
-      return [];
-    }
-
-    const content = fs.readFileSync(filePath, "utf-8");
-
-    if (!content.trim()) {
-      return [];
-    }
-
-    const data = JSON.parse(content);
-
-    if (Array.isArray(data)) {
-      return data.filter(
-        (item): item is string => typeof item === "string"
-      );
-    }
-
-    if (Array.isArray(data.messages)) {
-      return data.messages.filter(
-        (item: unknown): item is string => typeof item === "string"
-      );
-    }
-
-    return [];
-  } catch (error) {
-    console.error("Erro ao ler daily-message.json:", error);
-    return [];
-  }
+  if (!existsSync(filePath)) return [];
+  const data: unknown = JSON.parse(readFileSync(filePath, "utf8").replace(/^\uFEFF/, ""));
+  const messages = Array.isArray(data) ? data : data && typeof data === "object" && "messages" in data ? data.messages : null;
+  if (!Array.isArray(messages) || messages.some(item => typeof item !== "string")) throw new Error("Arquivo de mensagens inválido; original preservado.");
+  return messages;
 }
-
 function saveMessages(messages: string[]) {
-  const directory = path.dirname(filePath);
-
-  if (!fs.existsSync(directory)) {
-    fs.mkdirSync(directory, { recursive: true });
-  }
-
-  fs.writeFileSync(
-    filePath,
-    JSON.stringify(messages, null, 2),
-    {
-      encoding: "utf-8",
-      flag: "w",
-    }
-  );
+  mkdirSync(path.dirname(filePath), { recursive: true });
+  writeFileSync(filePath + ".tmp", JSON.stringify(messages, null, 2), "utf8");
+  renameSync(filePath + ".tmp", filePath);
 }
-
-export async function GET() {
-  const messages = readMessages();
-
-  return NextResponse.json({
-    messages,
-  });
-}
-
-export async function POST(request: Request) {
+function json(value: unknown, status = 200) { return NextResponse.json(value, { status, headers: { "Cache-Control": "no-store" } }); }
+export function GET() {
   try {
-    const body = await request.json();
-
-    const message =
-      typeof body === "string"
-        ? body.trim()
-        : typeof body?.message === "string"
-          ? body.message.trim()
-          : "";
-
-    if (!message) {
-      return NextResponse.json(
-        { error: "Mensagem não informada." },
-        { status: 400 }
-      );
-    }
-
     const messages = readMessages();
-
-    messages.push(message);
-
-    saveMessages(messages);
-
-    return NextResponse.json(
-      {
-        success: true,
-        message,
-        messages,
-      },
-      { status: 201 }
-    );
-  } catch (error) {
-    console.error("Erro ao adicionar mensagem:", error);
-
-    return NextResponse.json(
-      { error: "Não foi possível adicionar a mensagem." },
-      { status: 500 }
-    );
-  }
+    return json({ messages, message: messages[Math.floor(Math.random() * messages.length)] || "Tenha um excelente dia!" });
+  } catch { return json({ error: "Não foi possível ler as mensagens." }, 500); }
 }
-
-export async function DELETE(request: Request) {
+async function mutate(request: NextRequest, remove: boolean) {
+  if (!checkAuth(request)) return json({ error: "Não autorizado." }, 401);
+  let body: unknown;
+  try { body = await request.json(); } catch { return json({ error: "JSON inválido." }, 400); }
+  const value = typeof body === "string" ? body : body && typeof body === "object" && "message" in body ? body.message : null;
+  if (typeof value !== "string" || !value.trim()) return json({ error: "Mensagem não informada." }, 400);
+  const message = value.trim();
   try {
-    const body = await request.json();
-
-    const message =
-      typeof body === "string"
-        ? body.trim()
-        : typeof body?.message === "string"
-          ? body.message.trim()
-          : "";
-
-    if (!message) {
-      return NextResponse.json(
-        { error: "Mensagem não informada." },
-        { status: 400 }
-      );
-    }
-
     const messages = readMessages();
-
-    const index = messages.findIndex(
-      (item) => item.trim() === message
-    );
-
-    if (index === -1) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: "Mensagem não encontrada.",
-          message,
-          messages,
-        },
-        { status: 404 }
-      );
-    }
-
-    // Remove exatamente a mensagem encontrada
-    messages.splice(index, 1);
-
-    // Regrava o JSON já sem a mensagem removida
+    if (remove) {
+      const index = messages.indexOf(message);
+      if (index < 0) return json({ error: "Mensagem não encontrada." }, 404);
+      messages.splice(index, 1);
+    } else messages.push(message);
     saveMessages(messages);
-
-    // Confirma que o arquivo realmente foi atualizado
-    const updatedMessages = readMessages();
-
-    return NextResponse.json({
-      success: true,
-      deleted: message,
-      messages: updatedMessages,
-    });
-  } catch (error) {
-    console.error("Erro ao remover mensagem:", error);
-
-    return NextResponse.json(
-      {
-        success: false,
-        error: "Não foi possível remover a mensagem.",
-      },
-      { status: 500 }
-    );
-  }
+    return json({ success: true, message, messages }, remove ? 200 : 201);
+  } catch { return json({ error: "Não foi possível salvar as mensagens." }, 500); }
 }
+export function POST(request: NextRequest) { return mutate(request, false); }
+export async function PUT(request: NextRequest) {
+  if (!checkAuth(request)) return json({ error: "Não autorizado." }, 401);
+  let body: unknown;
+  try { body = await request.json(); } catch { return json({ error: "JSON inválido." }, 400); }
+  const dados = body && typeof body === "object" ? body as Record<string, unknown> : {};
+  const antigo = typeof dados.oldMessage === "string" ? dados.oldMessage.trim() : "";
+  const novo = typeof dados.message === "string" ? dados.message.trim() : "";
+  if (!antigo || !novo) return json({ error: "Mensagem antiga e nova são obrigatórias." }, 400);
+  try {
+    const messages = readMessages();
+    const index = messages.indexOf(antigo);
+    if (index < 0) return json({ error: "Mensagem não encontrada." }, 404);
+    messages[index] = novo;
+    saveMessages(messages);
+    return json({ success: true, message: novo, messages });
+  } catch { return json({ error: "Não foi possível editar a mensagem." }, 500); }
+}
+export function DELETE(request: NextRequest) { return mutate(request, true); }

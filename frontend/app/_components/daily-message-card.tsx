@@ -1,31 +1,37 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useCallback } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   MessageCircleHeart,
   RefreshCcw,
   X,
 } from "lucide-react";
-import { getDailyMessage } from "../_lib/daily-message";
+import { createPortal } from "react-dom";
+import { useModalFocus } from "../_hooks/use-modal-focus";
 
 export function DailyMessageCard() {
   const [popupOpen, setPopupOpen] = useState(false);
   const [message, setMessage] = useState("");
 
-  const loadMessage = () => {
-    const dailyMessage = getDailyMessage(new Date());
-    setMessage(dailyMessage.message);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const modalRef = useRef<HTMLDivElement>(null);
+  const busy = useRef(false);
+  const loadMessage = async () => {
+    if (busy.current) return;
+    busy.current = true; setLoading(true); setError("");
+    try {
+      const response = await fetch("/api/daily-message", { cache: "no-store" });
+      if (!response.ok) throw new Error("Não foi possível carregar a mensagem. Tente novamente.");
+      const data = await response.json();
+      setMessage(typeof data.message === "string" ? data.message : "Tenha um excelente dia!");
+    } catch (error) { setError(error instanceof Error ? error.message : "Falha ao carregar a mensagem."); }
+    finally { busy.current = false; setLoading(false); }
   };
-
-  const openPopup = () => {
-    loadMessage();
-    setPopupOpen(true);
-  };
-
-  const closePopup = () => {
-    setPopupOpen(false);
-  };
+  const openPopup = () => { setPopupOpen(true); void loadMessage(); };
+  const closePopup = useCallback(() => setPopupOpen(false), []);
+  useModalFocus(popupOpen, modalRef, closePopup);
 
   return (
     <>
@@ -129,7 +135,7 @@ export function DailyMessageCard() {
           POPUP
       ======================================================= */}
 
-      <AnimatePresence>
+      {popupOpen && createPortal(<AnimatePresence>
         {popupOpen && (
           <motion.div
             className="
@@ -149,13 +155,16 @@ export function DailyMessageCard() {
             onClick={closePopup}
           >
             <motion.div
+              ref={modalRef}
+              tabIndex={-1}
               role="dialog"
               aria-modal="true"
               aria-labelledby="daily-message-title"
               className="
                 w-full
                 max-w-2xl
-                overflow-hidden
+                max-h-[90dvh]
+                overflow-y-auto
                 rounded-[20px]
                 bg-white
                 p-6
@@ -258,7 +267,7 @@ export function DailyMessageCard() {
                   text-[#173425]
                 "
               >
-                {message || "Carregando a mensagem do dia..."}
+                {loading ? "Carregando a mensagem do dia…" : error || message}
               </p>
 
               {/* =================================================
@@ -278,6 +287,7 @@ export function DailyMessageCard() {
                 <button
                   type="button"
                   onClick={loadMessage}
+                  disabled={loading}
                   className="
                     flex
                     h-11
@@ -328,7 +338,7 @@ export function DailyMessageCard() {
             </motion.div>
           </motion.div>
         )}
-      </AnimatePresence>
+      </AnimatePresence>, document.body)}
     </>
   );
 }
