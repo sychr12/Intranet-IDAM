@@ -11,6 +11,8 @@ import {
   QuickAccess,
 } from "./_components/home-dashboard";
 import { Header, Sidebar } from "./_components/navigation";
+import { PopupAvisos } from "./_components/popup-avisos";
+import { VisitTracker } from "./_components/visit-tracker";
 import type { DepartmentKey } from "./_data/home";
 import { useHolidays } from "./_hooks/use-holidays";
 
@@ -48,6 +50,8 @@ export default function Page() {
 
   return (
     <div className="min-h-screen bg-[#f7f8f5] text-[#111d16]">
+      <VisitTracker />
+      <PopupAvisos />
       <Header
         onToggleMenu={() => {
           if (window.matchMedia("(min-width: 1024px)").matches) {
