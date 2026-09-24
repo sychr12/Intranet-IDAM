@@ -98,7 +98,7 @@ export default function Page() {
                 </div>
               </div>
 
-              <div className="grid min-w-0 grid-cols-1 items-start gap-4 md:grid-cols-[minmax(0,1.15fr)_minmax(360px,0.85fr)]">
+              <div className="grid min-w-0 grid-cols-1 items-stretch gap-4 md:grid-cols-[minmax(0,1.15fr)_minmax(360px,0.85fr)]">
                 <MiniCalendar
                   today={now}
                   loading={false}

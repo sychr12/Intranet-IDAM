@@ -22,7 +22,6 @@ import {
   Building2,
   ChevronLeft,
   ChevronRight,
-  Calendar,
   Clock,
   ExternalLink,
   CheckCircle,
@@ -757,35 +756,19 @@ export function PopupAvisos() {
               </div>
 
               {/* DATAS */}
-              {(aviso.publishedDate || aviso.expirationDate) && (
+              {aviso.expirationDate && (
                 <div className="mt-3 grid gap-2 text-sm text-gray-500 sm:grid-cols-2">
-                  {aviso.publishedDate && (
-                    <div className="flex items-center gap-2 rounded border border-gray-200 bg-gray-50 px-3 py-1.5">
-                      <Calendar className="size-3.5 shrink-0 text-gray-400" strokeWidth={1.75} />
-                      <div className="min-w-0">
-                        <span className="block text-[10px] font-medium uppercase tracking-wider text-gray-400">
-                          Publicado
-                        </span>
-                        <span className="truncate text-sm text-gray-700">
-                          {formatarData(aviso.publishedDate)}
-                        </span>
-                      </div>
+                  <div className="flex items-center gap-2 rounded border border-gray-200 bg-gray-50 px-3 py-1.5">
+                    <Clock className="size-3.5 shrink-0 text-gray-400" strokeWidth={1.75} />
+                    <div className="min-w-0">
+                      <span className="block text-[10px] font-medium uppercase tracking-wider text-gray-400">
+                        Expira
+                      </span>
+                      <span className="truncate text-sm text-gray-700">
+                        {formatarData(aviso.expirationDate)}
+                      </span>
                     </div>
-                  )}
-
-                  {aviso.expirationDate && (
-                    <div className="flex items-center gap-2 rounded border border-gray-200 bg-gray-50 px-3 py-1.5">
-                      <Clock className="size-3.5 shrink-0 text-gray-400" strokeWidth={1.75} />
-                      <div className="min-w-0">
-                        <span className="block text-[10px] font-medium uppercase tracking-wider text-gray-400">
-                          Expira
-                        </span>
-                        <span className="truncate text-sm text-gray-700">
-                          {formatarData(aviso.expirationDate)}
-                        </span>
-                      </div>
-                    </div>
-                  )}
+                  </div>
                 </div>
               )}
 

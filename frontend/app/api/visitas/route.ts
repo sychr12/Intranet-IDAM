@@ -1,14 +1,40 @@
 import { timingSafeEqual } from "node:crypto";
+import { reverse } from "node:dns/promises";
 import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
+import { isIP } from "node:net";
 import path from "node:path";
 import { NextRequest, NextResponse } from "next/server";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-type Visitas = Record<string, { primeiraVez: string; ultimaVez: string; pagina?: string; navegador?: string; nome?: string; departamento?: string }>;
+type Visita = {
+  primeiraVez: string;
+  ultimaVez: string;
+  pagina?: string;
+  navegador?: string;
+  nome?: string;
+  departamento?: string;
+  ip?: string;
+  maquina?: string;
+  ultimaAtividade?: string;
+};
+
+type Visitas = Record<string, Visita>;
 const dataFile = path.join(process.cwd(), process.env.INTRANET_DATA_DIR || "data", "visitas.json");
 const onlineThresholdMs = 2 * 60 * 1000;
+const reverseDnsTimeoutMs = 300;
+const reverseDnsCacheTtlMs = 6 * 60 * 60 * 1000;
+const reverseDnsFailureCacheTtlMs = 5 * 60 * 1000;
+const reverseDnsCacheMaxEntries = 500;
+
+type ReverseDnsCacheEntry = {
+  maquina?: string;
+  expiresAt: number;
+  pending?: Promise<void>;
+};
+
+const reverseDnsCache = new Map<string, ReverseDnsCacheEntry>();
 let writeQueue: Promise<unknown> = Promise.resolve();
 
 function enqueue<T>(task: () => Promise<T>): Promise<T> {
@@ -45,15 +71,28 @@ export async function POST(request: NextRequest) {
   try {
     await enqueue(async () => {
       const visitas = await readVisitas();
-      const now = new Date().toISOString();
+      const nowMs = Date.now();
+      const now = new Date(nowMs).toISOString();
+      const visitaAnterior = visitas[sessionId];
       const usuarioAutenticado = obterUsuarioAutenticado(request);
+      const departamentoAutenticado = obterDepartamentoAutenticado(request);
+      const ip = obterIpCliente(request);
+      const maquinaInformada = obterMaquinaInformada(request);
+      const maquinaResolvida = ip ? obterMaquinaResolvidaEmCache(ip) : undefined;
+      const nome = usuarioAutenticado ?? obterTextoInformado(body.nome, 80, ["visitante"]);
+      const departamento = departamentoAutenticado ?? obterTextoInformado(body.departamento, 80, ["não informado", "nao informado"]);
+
       visitas[sessionId] = {
-        primeiraVez: visitas[sessionId]?.primeiraVez ?? now,
+        ...visitaAnterior,
+        primeiraVez: sessaoEstaInativa(visitaAnterior, nowMs) ? now : visitaAnterior.primeiraVez,
         ultimaVez: now,
+        ultimaAtividade: now,
         pagina: typeof body.pagina === "string" ? body.pagina.slice(0, 200) : "/",
         navegador: identificarNavegador(typeof body.navegador === "string" ? body.navegador : ""),
-        nome: usuarioAutenticado || (typeof body.nome === "string" ? body.nome.slice(0, 80) : "Visitante"),
-        departamento: typeof body.departamento === "string" ? body.departamento.slice(0, 80) : "Não informado",
+        ...(nome ? { nome } : {}),
+        ...(departamento ? { departamento } : {}),
+        ...(ip ? { ip } : {}),
+        ...(maquinaInformada || maquinaResolvida ? { maquina: maquinaInformada ?? maquinaResolvida } : {}),
       };
       await saveVisitas(visitas);
     });
@@ -61,15 +100,119 @@ export async function POST(request: NextRequest) {
   } catch { return NextResponse.json({ error: "Não foi possível registrar a visita." }, { status: 500 }); }
 }
 
-// O navegador não expõe o usuário do sistema operacional. Em produção, um
-// proxy com SSO pode repassar o usuário autenticado por um destes cabeçalhos.
+// Estes cabeçalhos só são confiáveis quando o proxy/SSO remove valores enviados
+// pelo cliente e define novamente a identidade validada antes de encaminhar a requisição.
 function obterUsuarioAutenticado(request: NextRequest): string | undefined {
   const value = request.headers.get("x-auth-user")
     || request.headers.get("x-remote-user")
     || request.headers.get("remote-user");
   if (!value) return undefined;
   const nome = value.trim().replace(/^.*[\\/]/, "");
-  return nome && nome.length <= 80 ? nome : undefined;
+  return obterTextoInformado(nome, 80);
+}
+
+function obterDepartamentoAutenticado(request: NextRequest): string | undefined {
+  return obterTextoInformado(
+    request.headers.get("x-auth-department") || request.headers.get("x-user-department"),
+    80,
+  );
+}
+
+function obterMaquinaInformada(request: NextRequest): string | undefined {
+  return obterTextoInformado(
+    request.headers.get("x-client-hostname") || request.headers.get("x-machine-name"),
+    255,
+  );
+}
+
+function obterTextoInformado(value: unknown, maxLength: number, ignoredValues: string[] = []): string | undefined {
+  if (typeof value !== "string") return undefined;
+  const normalized = value.trim();
+  if (!normalized || /[\u0000-\u001f\u007f]/.test(normalized)) return undefined;
+  if (ignoredValues.includes(normalized.toLocaleLowerCase("pt-BR"))) return undefined;
+  return normalized.slice(0, maxLength);
+}
+
+function obterIpCliente(request: NextRequest): string | undefined {
+  // O proxy confiável deve sobrescrever estes cabeçalhos; o primeiro endereço
+  // de x-forwarded-for representa o cliente na configuração esperada.
+  const forwardedFor = request.headers.get("x-forwarded-for")?.split(",", 1)[0];
+  const candidates = [
+    forwardedFor,
+    request.headers.get("x-real-ip"),
+    request.headers.get("cf-connecting-ip"),
+  ];
+
+  for (const candidate of candidates) {
+    const ip = normalizarIp(candidate);
+    if (ip) return ip;
+  }
+  return undefined;
+}
+
+function normalizarIp(value: string | null | undefined): string | undefined {
+  if (!value) return undefined;
+  let candidate = value.trim().replace(/^"|"$/g, "");
+  if (!candidate || candidate.toLowerCase() === "unknown") return undefined;
+
+  if (candidate.startsWith("[")) {
+    const closingBracket = candidate.indexOf("]");
+    if (closingBracket > 0) candidate = candidate.slice(1, closingBracket);
+  } else {
+    const ipv4WithPort = candidate.match(/^(\d{1,3}(?:\.\d{1,3}){3}):\d+$/);
+    if (ipv4WithPort) candidate = ipv4WithPort[1];
+  }
+
+  if (candidate.startsWith("::ffff:") && isIP(candidate.slice(7)) === 4) candidate = candidate.slice(7);
+  return isIP(candidate) ? candidate : undefined;
+}
+
+function obterMaquinaResolvidaEmCache(ip: string): string | undefined {
+  const now = Date.now();
+  const cached = reverseDnsCache.get(ip);
+  if (cached && cached.expiresAt > now) return cached.maquina;
+  if (cached?.pending) return cached.maquina;
+
+  if (reverseDnsCache.size >= reverseDnsCacheMaxEntries) {
+    const oldestKey = reverseDnsCache.keys().next().value;
+    if (oldestKey) reverseDnsCache.delete(oldestKey);
+  }
+
+  const pending = resolverHostname(ip).then((maquina) => {
+    reverseDnsCache.set(ip, {
+      maquina,
+      expiresAt: Date.now() + (maquina ? reverseDnsCacheTtlMs : reverseDnsFailureCacheTtlMs),
+    });
+  });
+
+  reverseDnsCache.set(ip, { maquina: cached?.maquina, expiresAt: cached?.expiresAt ?? 0, pending });
+  void pending;
+  return cached?.maquina;
+}
+
+async function resolverHostname(ip: string): Promise<string | undefined> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const timeout = new Promise<string[]>((resolve) => {
+    timer = setTimeout(() => resolve([]), reverseDnsTimeoutMs);
+    timer.unref?.();
+  });
+
+  try {
+    const hostnames = await Promise.race([reverse(ip).catch(() => []), timeout]);
+    return obterTextoInformado(hostnames[0], 255);
+  } finally {
+    if (timer) clearTimeout(timer);
+  }
+}
+
+function obterUltimaAtividade(visita: Visita): string {
+  return visita.ultimaAtividade || visita.ultimaVez;
+}
+
+function sessaoEstaInativa(visita: Visita | undefined, now: number): boolean {
+  if (!visita) return true;
+  const ultimaAtividade = Date.parse(obterUltimaAtividade(visita));
+  return !Number.isFinite(ultimaAtividade) || now - ultimaAtividade > onlineThresholdMs;
 }
 
 export async function GET(request: NextRequest) {
@@ -81,13 +224,24 @@ export async function GET(request: NextRequest) {
     const dayKey = (date: Date) => date.toLocaleDateString("en-CA", { timeZone: "America/Manaus" });
     const today = dayKey(new Date());
     const sessions = Object.values(visitas);
-    const ultimaConexao = sessions.map(({ ultimaVez }) => ultimaVez).sort().at(-1) ?? null;
+    const ultimaConexao = sessions.map(obterUltimaAtividade).sort().at(-1) ?? null;
     return NextResponse.json({
-      onlineAgora: sessions.filter(({ ultimaVez }) => now - new Date(ultimaVez).getTime() <= onlineThresholdMs).length,
-      acessosHoje: sessions.filter(({ ultimaVez }) => dayKey(new Date(ultimaVez)) === today).length,
+      onlineAgora: sessions.filter(p => now - Date.parse(obterUltimaAtividade(p)) <= onlineThresholdMs).length,
+      acessosHoje: sessions.filter(p => dayKey(new Date(obterUltimaAtividade(p))) === today).length,
       totalVisitantes: sessions.length,
       ultimaConexao,
-      visitantes: sessions.filter(({ ultimaVez }) => now - Date.parse(ultimaVez) <= onlineThresholdMs).map(p => ({ nome: p.nome || "Visitante", departamento: p.departamento || "Não informado", pagina: p.pagina || "/", tempo: Math.floor((now - Date.parse(p.primeiraVez)) / 60000) + " min", navegador: p.navegador || "Não informado" })),
+      visitantes: sessions
+        .filter(p => now - Date.parse(obterUltimaAtividade(p)) <= onlineThresholdMs)
+        .map(p => ({
+          nome: p.nome ?? null,
+          departamento: p.departamento ?? null,
+          pagina: p.pagina || "/",
+          tempo: Math.max(0, Math.floor((now - Date.parse(p.primeiraVez)) / 60000)) + " min",
+          navegador: p.navegador || "Não informado",
+          ip: p.ip ?? null,
+          maquina: p.maquina ?? null,
+          ultimaAtividade: obterUltimaAtividade(p),
+        })),
     }, { headers: { "Cache-Control": "no-store" } });
   } catch { return NextResponse.json({ error: "Não foi possível ler as estatísticas." }, { status: 500 }); }
 }

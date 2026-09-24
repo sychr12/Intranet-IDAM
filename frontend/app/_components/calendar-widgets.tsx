@@ -112,8 +112,8 @@ export function MiniCalendar({
     today.getFullYear() === cursor.getFullYear();
 
   return (
-    <motion.div id="calendar" variants={cardEntranceVariants} initial="hidden" animate="show">
-      <ShellCard className="min-h-[252px] p-4 sm:p-5">
+    <motion.div id="calendar" className="h-full" variants={cardEntranceVariants} initial="hidden" animate="show">
+      <ShellCard className="h-full min-h-[252px] p-4 sm:p-5">
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
           <h2 className="flex items-center gap-2 text-[17px] font-black text-[#0b3a22]">
             <motion.span
