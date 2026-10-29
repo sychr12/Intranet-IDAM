@@ -66,7 +66,7 @@ export const headerAreas: LinkItem[] = [
   { title: "Sistema de Gestão", icon: Settings, href: "/sgc" },
   { title: "Departamento Jurídico", icon: Users, href: "/pj" },
   { title: "Documentos", icon: FolderOpen, href: "/documentos" },
-  { title: "Chamados TI", icon: Wrench, href: "https://nti.idam.am.gov.br/front/helpdesk.public.php" },
+  { title: "Chamados TI", icon: Wrench, href: "https://nti.idam.am.gov.br/" },
 ];
 
 // Sistemas institucionais exibidos como acessos rápidos.
@@ -77,7 +77,7 @@ export const quickAccessLinks: LinkItem[] = [
   { title: "SEFAZ", icon: Globe, href: "https://www.sefaz.am.gov.br/" },
   { title: "SIGED", icon: FolderOpen, href: "https://sistemas.sefaz.am.gov.br/siged/login" },
   { title: "SITE IDAM", icon: Globe, href: "https://www.idam.am.gov.br/" },
-  { title: "SUPORTE TI", icon: Wrench, href: "https://nti.idam.am.gov.br/front/helpdesk.public.php" },
+  { title: "SUPORTE TI", icon: Wrench, href: "https://nti.idam.am.gov.br/" },
 ];
 
 // Aplicativos Microsoft 365 disponíveis para acesso rápido.

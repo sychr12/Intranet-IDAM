@@ -7,11 +7,9 @@ import { DailyMessageCard } from "./_components/daily-message-card";
 import { Footer } from "./_components/footer";
 import {
   BannerCarousel,
-  DepartmentHub,
   QuickAccess,
 } from "./_components/home-dashboard";
 import { Header, Sidebar } from "./_components/navigation";
-import type { DepartmentKey } from "./_data/home";
 import { useHolidays } from "./_hooks/use-holidays";
 
 const pageVariants: Variants = {
@@ -21,7 +19,6 @@ const pageVariants: Variants = {
 
 export default function Page() {
   // Estados das abas, da navegação responsiva e da integração com os serviços.
-  const [selectedDept, setSelectedDept] = useState<DepartmentKey>("PJ");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [now] = useState<Date>(new Date());
@@ -47,7 +44,7 @@ export default function Page() {
   }, [sidebarOpen]);
 
   return (
-    <div className="min-h-screen bg-[#f7f8f5] text-[#111d16]">
+    <div className="min-h-screen bg-[#EDF1F0] text-[#173849]">
       <Header
         onToggleMenu={() => {
           if (window.matchMedia("(min-width: 1024px)").matches) {
@@ -63,7 +60,7 @@ export default function Page() {
         aria-label="Fechar menu"
         tabIndex={sidebarOpen ? 0 : -1}
         aria-hidden={!sidebarOpen}
-        className={`fixed inset-0 z-[60] bg-[#001b10]/55 backdrop-blur-[2px] transition-opacity lg:hidden ${sidebarOpen ? "opacity-100" : "pointer-events-none opacity-0"}`}
+        className={`fixed inset-0 z-[60] bg-[#0B3F43]/55 backdrop-blur-[2px] transition-opacity lg:hidden ${sidebarOpen ? "opacity-100" : "pointer-events-none opacity-0"}`}
       />
 
       <motion.div
@@ -82,23 +79,14 @@ export default function Page() {
         <main className="min-w-0 flex-1 px-0 py-4 pr-3 sm:px-0 sm:pr-4 sm:py-5 xl:px-0 xl:pr-5">
           <div className="grid w-full gap-4">
             <div className="grid min-w-0 gap-4">
-              <div className="grid min-w-0 grid-cols-1 items-start gap-4 xl:grid-cols-[minmax(0,2.3fr)_minmax(360px,1fr)]">
-                <div className="grid min-w-0 content-start gap-4 xl:gap-5">
-                  <QuickAccess />
-                  <div className="flex min-w-0 items-center">
-                    <BannerCarousel />
-                  </div>
-                </div>
-                <div className="grid gap-4">
-                  <DailyMessageCard />
-                  <DepartmentHub
-                    selectedDept={selectedDept}
-                    setSelectedDept={setSelectedDept}
-                  />
-                </div>
+              <BannerCarousel />
+
+              <div className="grid min-w-0 grid-cols-1 items-stretch gap-4 xl:grid-cols-[minmax(0,2.3fr)_minmax(360px,1fr)]">
+                <QuickAccess />
+                <DailyMessageCard />
               </div>
 
-              <div className="grid min-w-0 grid-cols-1 items-stretch gap-4 md:grid-cols-[minmax(0,1.15fr)_minmax(360px,0.85fr)]">
+              <div className="grid min-w-0 grid-cols-1 items-stretch gap-4 lg:grid-cols-2">
                 <MiniCalendar
                   today={now}
                   loading={false}
@@ -106,14 +94,12 @@ export default function Page() {
                   holidaysLoading={calendarHolidayState.loading}
                   onYearChange={setCalendarYear}
                 />
-                <div className="grid gap-4">
-                  <Notices
-                    today={now}
-                    holidays={noticeHolidayState.holidays}
-                    loading={noticeHolidayState.loading}
-                    unavailable={noticeHolidayState.unavailable}
-                  />
-                </div>
+                <Notices
+                  today={now}
+                  holidays={noticeHolidayState.holidays}
+                  loading={noticeHolidayState.loading}
+                  unavailable={noticeHolidayState.unavailable}
+                />
               </div>
             </div>
           </div>

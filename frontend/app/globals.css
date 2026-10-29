@@ -6,6 +6,20 @@
   --color-foreground: var(--foreground);
 }
 
+:root {
+  --background: #EDF1F0;
+  --foreground: #173849;
+  --brand-primary: #14786C;
+  --brand-dark: #0D675D;
+  --brand-medium: #0F897A;
+  --brand-light: #DFF2EC;
+  --brand-soft: #DCEEE9;
+  --surface: #FFFFFF;
+  --surface-soft: #F7FAF9;
+  --border: #D7E1DE;
+  --text-muted: #6F858C;
+}
+
 /* Base visual e limites mínimos compartilhados por toda a aplicação. */
 html {
   font-size: 17px;
@@ -16,7 +30,7 @@ body {
   color: var(--foreground);
   min-width: 320px;
   overflow-x: hidden;
-  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+  font-family: "Segoe UI", Arial, Helvetica, sans-serif;
   line-height: 1.55;
 }
 
@@ -28,7 +42,7 @@ a {
 /* Indicador de foco visível para navegação por teclado. */
 button:focus-visible,
 a:focus-visible {
-  outline: 3px solid #8bc600;
+  outline: 3px solid #0F897A;
   outline-offset: 3px;
 }
 
@@ -44,8 +58,8 @@ a:focus-visible {
 }
 
 @keyframes flash-highlight {
-  0% { box-shadow: 0 0 0 0 rgba(189, 255, 119, 0.0); background-color: rgba(189,255,119,0.12); }
-  30% { box-shadow: 0 6px 18px 4px rgba(189, 255, 119, 0.18); background-color: rgba(189,255,119,0.18); }
-  70% { box-shadow: 0 0 0 0 rgba(189, 255, 119, 0.08); background-color: rgba(189,255,119,0.08); }
-  100% { box-shadow: 0 0 0 0 rgba(189, 255, 119, 0.0); background-color: transparent; }
+  0% { box-shadow: 0 0 0 0 rgba(15, 137, 122, 0.0); background-color: rgba(15,137,122,0.12); }
+  30% { box-shadow: 0 6px 18px 4px rgba(15, 137, 122, 0.18); background-color: rgba(15,137,122,0.18); }
+  70% { box-shadow: 0 0 0 0 rgba(15, 137, 122, 0.08); background-color: rgba(15,137,122,0.08); }
+  100% { box-shadow: 0 0 0 0 rgba(15, 137, 122, 0.0); background-color: transparent; }
 }

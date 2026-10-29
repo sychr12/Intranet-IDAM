@@ -40,7 +40,7 @@ export function NotificationPermission() {
     <button
       type="button"
       onClick={enable}
-      className="fixed bottom-4 right-4 z-[70] rounded-xl bg-[#087A42] px-4 py-3 text-sm font-bold text-white shadow-lg transition hover:bg-[#056633]"
+      className="fixed bottom-4 right-4 z-[70] rounded-xl bg-[#14786C] px-4 py-3 text-sm font-bold text-white shadow-lg transition hover:bg-[#0D675D]"
       title={status === "denied" ? "Notificações bloqueadas. Clique e permita nas configurações do navegador." : undefined}
     >
       {error || (status === "denied" ? "Notificações bloqueadas — liberar" : status === "unsupported" ? "Navegador sem notificações" : "Ativar notificações da Intranet")}
