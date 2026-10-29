@@ -118,15 +118,15 @@ const PRIORITY_CONFIGS: Record<Priority, PriorityConfig> = {
   },
   normal: {
     label: "Informativo",
-    bgLight: "bg-blue-50/80",
-    borderColor: "border-blue-500",
-    headerBg: "bg-blue-700",
-    shadowColor: "rgba(29,78,216,0.15)",
+    bgLight: "bg-[#DFF2EC]",
+    borderColor: "border-[#0F897A]",
+    headerBg: "bg-[#14786C]",
+    shadowColor: "rgba(13,103,93,0.18)",
     alertIcon: <Info className="size-5" strokeWidth={1.75} />,
-    dotColor: "bg-blue-600",
-    badgeBg: "bg-blue-600",
+    dotColor: "bg-[#0F897A]",
+    badgeBg: "bg-[#0F897A]",
     badgeText: "text-white",
-    hoverBg: "hover:bg-blue-50",
+    hoverBg: "hover:bg-[#DFF2EC]",
   },
 };
 
@@ -653,39 +653,8 @@ export function PopupAvisos() {
             {/* TOP BAR - PRIORITY */}
             <div className={`h-1 w-full ${config.headerBg}`} />
 
-            {/* INDICADOR DE POSIÇÃO COM SETAS */}
-            {temMultiplosAvisos && (
-              <div className="absolute left-1/2 top-3 z-10 -translate-x-1/2">
-                <div className="flex items-center gap-1 rounded-full bg-white/95 px-2 py-1 shadow-sm ring-1 ring-black/5">
-                  <button
-                    type="button"
-                    onClick={irParaAnterior}
-                    className={`group rounded-full p-1 text-gray-400 transition-all hover:bg-gray-100 hover:text-gray-700 active:scale-95 ${config.hoverBg}`}
-                    aria-label="Anterior"
-                  >
-                    <ChevronLeft className="size-4" strokeWidth={2.5} />
-                  </button>
-
-                  <span className="min-w-[48px] text-center text-xs font-medium text-gray-600">
-                    <span className="font-bold text-gray-800">{currentIndex + 1}</span>
-                    <span className="text-gray-300">/</span>
-                    <span className="text-gray-500">{avisos.length}</span>
-                  </span>
-
-                  <button
-                    type="button"
-                    onClick={irParaProximo}
-                    className={`group rounded-full p-1 text-gray-400 transition-all hover:bg-gray-100 hover:text-gray-700 active:scale-95 ${config.hoverBg}`}
-                    aria-label="Próximo"
-                  >
-                    <ChevronRight className="size-4" strokeWidth={2.5} />
-                  </button>
-                </div>
-              </div>
-            )}
-
             {/* CABEÇALHO */}
-            <div className={`${config.headerBg} px-6 pb-4 pt-10`}>
+            <div className={`${config.headerBg} px-6 py-5`}>
               <div className="flex items-start justify-between gap-4">
                 <div className="flex min-w-0 flex-1 items-start gap-3">
                   <div className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded bg-white/10 text-white">
@@ -745,7 +714,7 @@ export function PopupAvisos() {
                         href={safeLink(aviso.link)}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1.5 text-sm font-medium text-blue-600 transition-colors hover:text-blue-700"
+                        className="inline-flex items-center gap-1.5 text-sm font-medium text-[#14786C] transition-colors hover:text-[#0D675D]"
                       >
                         {aviso.linkText || "Saiba mais"}
                         <ExternalLink className="size-3.5" strokeWidth={1.75} />
@@ -786,23 +755,66 @@ export function PopupAvisos() {
               </div>
             </div>
 
-            {/* DOTS */}
+            {/* NAVEGAÇÃO ENTRE AVISOS */}
             {temMultiplosAvisos && (
-              <div className="flex justify-center gap-1.5 px-6 pb-3">
-                {avisos.map((_, index) => (
-                  <button
-                    key={index}
-                    type="button"
-                    onClick={() => setCurrentIndex(index)}
-                    className={`h-1 rounded-full transition-all ${
-                      index === currentIndex
-                        ? `w-5 ${config.dotColor}`
-                        : "w-1.5 bg-gray-200 hover:bg-gray-300"
-                    }`}
-                    aria-label={`Ir para comunicado ${index + 1}`}
+              <nav
+                className="grid grid-cols-[1fr_auto_1fr] items-center gap-3 border-t border-[#D7E1DE] bg-[#F8FAF9] px-4 py-3 sm:px-5"
+                aria-label="Navegação entre avisos"
+              >
+                <button
+                  type="button"
+                  onClick={irParaAnterior}
+                  className="group inline-flex min-h-10 w-fit items-center justify-center gap-1.5 rounded-[10px] border border-[#D7E1DE] bg-white px-3 text-sm font-semibold text-[#365563] shadow-sm transition hover:border-[#0F897A] hover:bg-[#DFF2EC] hover:text-[#0D675D] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F897A] focus-visible:ring-offset-2 active:scale-[0.97]"
+                  aria-label={`Aviso anterior, ${currentIndex === 0 ? avisos.length : currentIndex} de ${avisos.length}`}
+                >
+                  <ChevronLeft
+                    className="size-5 transition-transform group-hover:-translate-x-0.5"
+                    strokeWidth={2.25}
+                    aria-hidden="true"
                   />
-                ))}
-              </div>
+                  <span className="hidden sm:inline">Anterior</span>
+                </button>
+
+                <div className="flex min-w-[92px] flex-col items-center gap-1.5" aria-live="polite">
+                  <span className="text-xs font-medium text-[#6F858C]">
+                    Aviso <strong className="font-black text-[#173849]">{currentIndex + 1}</strong>
+                    <span aria-hidden="true"> de </span>
+                    <span className="sr-only">de</span>
+                    <strong className="font-black text-[#173849]">{avisos.length}</strong>
+                  </span>
+
+                  <div className="flex items-center justify-center gap-1.5" aria-label="Selecionar aviso">
+                    {avisos.map((item, index) => (
+                      <button
+                        key={item.id}
+                        type="button"
+                        onClick={() => setCurrentIndex(index)}
+                        className={`h-1.5 rounded-full transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F897A] focus-visible:ring-offset-2 ${
+                          index === currentIndex
+                            ? `w-6 ${config.dotColor}`
+                            : "w-1.5 bg-[#C9D5D2] hover:bg-[#8EA5A0]"
+                        }`}
+                        aria-label={`Ir para o aviso ${index + 1} de ${avisos.length}`}
+                        aria-current={index === currentIndex ? "true" : undefined}
+                      />
+                    ))}
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={irParaProximo}
+                  className="group inline-flex min-h-10 w-fit justify-self-end items-center justify-center gap-1.5 rounded-[10px] border border-[#D7E1DE] bg-white px-3 text-sm font-semibold text-[#365563] shadow-sm transition hover:border-[#0F897A] hover:bg-[#DFF2EC] hover:text-[#0D675D] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F897A] focus-visible:ring-offset-2 active:scale-[0.97]"
+                  aria-label={`Próximo aviso, ${currentIndex === avisos.length - 1 ? 1 : currentIndex + 2} de ${avisos.length}`}
+                >
+                  <span className="hidden sm:inline">Próximo</span>
+                  <ChevronRight
+                    className="size-5 transition-transform group-hover:translate-x-0.5"
+                    strokeWidth={2.25}
+                    aria-hidden="true"
+                  />
+                </button>
+              </nav>
             )}
           </motion.section>
         </div>

@@ -1,30 +1,19 @@
-# Intranet IDAM - Frontend
+# Frontend da Intranet IDAM 2.0
 
-Interface da intranet corporativa do IDAM, construída com Next.js, React e Tailwind CSS.
+Aplicação Next.js responsável pela interface e pelas APIs internas da Intranet IDAM.
 
-## Execução com Docker
+## Desenvolvimento
 
-Na raiz do projeto:
-
-```powershell
-docker compose up --build
-```
-
-A aplicação fica disponível em `http://localhost:3000`.
-
-## Desenvolvimento local
-
-Dentro da pasta `frontend`:
-
-```powershell
+```bash
 npm install
 npm run dev
 ```
 
-Comandos de validação:
+## Validação
 
-```powershell
+```bash
 npm run lint
 npm run build
 ```
 
+Para informações sobre funcionalidades, autoria e licença, consulte o [README principal](../README.md).

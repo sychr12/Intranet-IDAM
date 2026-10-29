@@ -127,7 +127,7 @@ export function Header({ onToggleMenu }: { onToggleMenu: () => void }) {
           <span className="min-w-0 border-l border-white/20 pl-2.5 leading-none">
             <strong className="block text-[17px] font-black">IDAM</strong>
             <span className="mt-1 hidden text-[17px] font-medium uppercase text-[#DFF2EC] sm:block">
-              Intranet corporativa
+              INTRANET
             </span>
           </span>
         </Link>

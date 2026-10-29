@@ -1,90 +1,70 @@
-# Intranet
+# Intranet IDAM 2.0
 
-Uma aplicação web desenvolvida para centralizar informações e recursos internos de uma organização. O projeto utiliza tecnologias modernas do ecossistema React, proporcionando uma interface responsiva, intuitiva e de fácil manutenção.
+Portal interno do IDAM para centralizar sistemas institucionais, comunicados, contatos, documentos, calendário e informações úteis às equipes.
 
-## 🚀 Tecnologias
+## Versão 2.0
 
-* Next.js 15+
-* React
-* TypeScript
-* Tailwind CSS
-* ESLint
+A versão 2.0 apresenta uma reformulação completa da experiência da intranet, com nova identidade visual, navegação responsiva, acessos organizados por área, calendário institucional e um sistema aprimorado de avisos.
 
-## 📁 Estrutura do Projeto
+### Desenvolvimento e autoria
 
-```text
-frontend/
-├── app/
-│   ├── criadores/
-│   ├── globals.css
-│   ├── layout.tsx
-│   └── page.tsx
-├── public/
-├── api/
-├── next.config.ts
-├── package.json
-├── tsconfig.json
-└── tailwind.config.js
-```
+- **Versão 2.0 — desenvolvimento e reformulação:** [Beatriz Christine Azevedo Batista](https://github.com/BeatrizChristine)
+- **Versão inicial:** desenvolvida colaborativamente pela equipe original da Intranet IDAM, com a autoria preservada no histórico de commits.
 
-## 📦 Funcionalidades
+## Funcionalidades
 
-* 📅 Calendário
-* 👥 Página de Criadores
-* 📱 Interface responsiva
-* 🎨 Estilização com Tailwind CSS
-* ⚡ Navegação utilizando o App Router do Next.js
+- Página inicial responsiva com acessos rápidos.
+- Sistemas organizados por área institucional.
+- Menu de arquivos, contatos e dicas de segurança.
+- Calendário com feriados e pontos facultativos.
+- Mensagens diárias e indicadores informativos.
+- Avisos com prioridade, período de publicação, mídia e links.
+- Navegação acessível entre múltiplos avisos.
+- APIs internas para avisos, calendário, mensagens, visitas e usuário atual.
 
-## ▶️ Como executar o projeto
+## Tecnologias
 
-### 1. Clone o repositório
+- Next.js 15
+- React 19
+- TypeScript
+- Tailwind CSS
+- Framer Motion
+- Lucide React
 
-```bash
-git clone <url-do-repositorio>
-```
+## Execução local
 
-### 2. Acesse a pasta do projeto
+Requisitos: Node.js 20 ou superior e npm.
 
 ```bash
 cd frontend
-```
-
-### 3. Instale as dependências
-
-```bash
 npm install
-```
-
-### 4. Execute o projeto
-
-```bash
 npm run dev
 ```
 
-A aplicação estará disponível em:
+A aplicação ficará disponível em `http://localhost:3000`.
 
-```text
-http://localhost:3000
+Para executar em outra porta:
+
+```bash
+npm run dev -- -H 0.0.0.0 -p 3100
 ```
 
-## 📂 Organização
+## Validação
 
-* `app/` — Páginas, layouts e componentes da aplicação.
-* `public/` — Arquivos estáticos como imagens e ícones.
-* `api/` — Funções utilitárias.
-* `globals.css` — Estilos globais da aplicação.
+```bash
+cd frontend
+npm run lint
+npm run build
+```
 
-## 🎯 Objetivos
+Os arquivos em `frontend/data` são utilizados durante a execução. Dados reais de visitantes e conteúdo operacional não devem ser publicados no repositório.
 
-* Desenvolver uma interface moderna e intuitiva.
-* Garantir responsividade em diferentes dispositivos.
-* Organizar as páginas de forma simples e escalável.
-* Manter um código limpo e de fácil manutenção.
+## Histórico
 
-## 👨‍💻 Desenvolvedores
+Consulte o [histórico de versões](CHANGELOG.md) para conhecer as principais mudanças da versão 2.0.
 
-Projeto desenvolvido pela equipe responsável pela Intranet.
+## Licença
 
-## 📄 Licença
+Distribuído sob a [Licença MIT](LICENSE).
 
-Este projeto é destinado para fins acadêmicos e/ou internos.
+Copyright (c) 2026 IDAM e colaboradores.

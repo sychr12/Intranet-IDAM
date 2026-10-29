@@ -1,7 +1,16 @@
 {
   "name": "intranet",
-  "version": "0.1.0",
+  "version": "2.0.0",
   "private": true,
+  "license": "MIT",
+  "author": {
+    "name": "Beatriz Christine Azevedo Batista",
+    "url": "https://github.com/BeatrizChristine"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sychr12/Intranet-IDAM.git"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
