@@ -612,9 +612,11 @@ export function PopupAvisos() {
     // Layout padrão: texto em cima, imagem embaixo
     return (
       <>
-        <p className="break-words text-sm leading-relaxed text-gray-700">
-          {message}
-        </p>
+        {message && (
+          <p className="break-words text-sm leading-relaxed text-gray-700">
+            {message}
+          </p>
+        )}
         <AvisoImage
           imageUrl={imageUrl}
           imageMimeType={aviso.imageMimeType}
@@ -693,7 +695,7 @@ export function PopupAvisos() {
                       id="aviso-title"
                       className="truncate text-base font-semibold text-white"
                     >
-                      {aviso.title}
+                      {aviso.title || "Aviso"}
                     </h2>
                     <div className="mt-0.5 flex flex-wrap items-center gap-1.5">
                       <span

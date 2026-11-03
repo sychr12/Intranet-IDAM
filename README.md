@@ -49,6 +49,10 @@ Para executar em outra porta:
 npm run dev -- -H 0.0.0.0 -p 3100
 ```
 
+## Configuração
+
+Copie `frontend/.env.example` para `frontend/.env.local` e informe em `INTRANET_AVISOS_TOKEN` o mesmo valor usado na Central de Avisos. Sem esse token, as rotas de alteração da API ficam abertas.
+
 ## Validação
 
 ```bash

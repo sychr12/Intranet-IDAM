@@ -654,18 +654,15 @@ export async function POST(
 
     const priority = normalizePriority(body.priority);
 
-    if (!title) {
+    const hasAttachment =
+      typeof body.imageBase64 === "string" &&
+      body.imageBase64.trim() !== "";
+
+    // Um popup pode ser composto somente por imagem ou outro anexo.
+    if (!title && !message && !hasAttachment) {
 
       return jsonError(
-        "O título é obrigatório.",
-        400
-      );
-    }
-
-    if (!message) {
-
-      return jsonError(
-        "A mensagem é obrigatória.",
+        "Informe um título, uma mensagem ou um anexo.",
         400
       );
     }
