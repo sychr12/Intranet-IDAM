@@ -130,12 +130,53 @@ const PRIORITY_CONFIGS: Record<Priority, PriorityConfig> = {
   },
 };
 
+type NoticeLevelLabel = "Informativo" | "Atenção" | "Crítico";
+
+function normalizeNoticeValue(value?: string): string {
+  return (value || "")
+    .normalize("NFD")
+    .replace(/\p{Diacritic}/gu, "")
+    .toLowerCase()
+    .trim();
+}
+
+function noticeLevelLabel(
+  criticality: string | undefined,
+  priority: string,
+): NoticeLevelLabel {
+  const level = normalizeNoticeValue(criticality);
+  const oldPriority = normalizeNoticeValue(priority);
+
+  if (
+    level.includes("critic") ||
+    oldPriority.includes("urgent") ||
+    oldPriority.includes("imediat") ||
+    oldPriority.includes("immediat")
+  ) {
+    return "Crítico";
+  }
+
+  if (
+    level.includes("attention") ||
+    level.includes("atencao") ||
+    level.includes("moder") ||
+    level === "high" ||
+    level === "alta" ||
+    oldPriority === "high" ||
+    oldPriority === "alta" ||
+    oldPriority === "importante"
+  ) {
+    return "Atenção";
+  }
+
+  return "Informativo";
+}
+
 function priorityForAviso(aviso: Aviso): Priority {
-  const criticality = (aviso.criticality || "").toLowerCase();
-  if (["crítica", "critica", "critical"].includes(criticality)) return "urgente";
-  if (["alta", "high", "moderada", "moderate"].includes(criticality)) return "importante";
-  if (["baixa", "low", "informativa", "informative"].includes(criticality)) return "normal";
-  return aviso.priority;
+  const level = noticeLevelLabel(aviso.criticality, aviso.priority);
+  if (level === "Crítico") return "urgente";
+  if (level === "Atenção") return "importante";
+  return "normal";
 }
 
 function configForAviso(aviso: Aviso): PriorityConfig {
@@ -151,20 +192,6 @@ function configForAviso(aviso: Aviso): PriorityConfig {
     return { ...base, bgLight: "bg-orange-50/80", borderColor: "border-orange-600", headerBg: "bg-orange-700", shadowColor: "rgba(180,83,9,0.15)", dotColor: "bg-orange-600", badgeBg: "bg-orange-600", hoverBg: "hover:bg-orange-50" };
   }
   return base;
-}
-
-function textoCriticidade(value?: string): string {
-  const normalizado = (value || "informativa").toLowerCase();
-  const labels: Record<string, string> = {
-    informative: "Informativa", informativa: "Informativa", low: "Baixa", baixa: "Baixa",
-    moderate: "Moderada", moderada: "Moderada", high: "Alta", alta: "Alta",
-    critical: "Crítica", critica: "Crítica", "crítica": "Crítica",
-  };
-  return labels[normalizado] || "Informativa";
-}
-
-function textoPrioridade(value: Priority): string {
-  return value === "urgente" ? "Urgente" : value === "importante" ? "Alta" : "Normal";
 }
 
 // ============================================================
@@ -672,7 +699,7 @@ export function PopupAvisos() {
                       <span
                         className={`inline-flex items-center gap-1 rounded ${config.badgeBg} px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider ${config.badgeText}`}
                       >
-                        {textoCriticidade(aviso.criticality)} - {textoPrioridade(aviso.priority)}
+                        {noticeLevelLabel(aviso.criticality, aviso.priority)}
                       </span>
                       <span className="flex items-center gap-1 text-xs text-white/60">
                         <CheckCircle className="size-3" strokeWidth={1.5} />
