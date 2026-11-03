@@ -120,7 +120,25 @@ export function BannerCarousel() {
         className="absolute inset-y-0 left-0 z-10 flex w-[68%] flex-col justify-center px-5 sm:w-[58%] sm:px-8 lg:w-[52%] lg:px-10"
       >
         <h1 className="text-[clamp(1.65rem,3.2vw,2.8rem)] font-black leading-[1.05] tracking-[-0.035em] text-[#14786C] drop-shadow-[0_1px_0_rgba(255,255,255,0.7)]">
-          {user === null ? "Olá!" : firstName ? `Olá, ${firstName}!` : "Olá!"}
+          {(() => {
+            const hora = Number(
+              new Intl.DateTimeFormat("pt-BR", {
+                timeZone: "America/Manaus",
+                hour: "2-digit",
+                hourCycle: "h23",
+              }).format(new Date())
+            );
+            const saudacao =
+              hora >= 5 && hora < 12
+                ? "Bom dia"
+                : hora >= 12 && hora < 18
+                  ? "Boa tarde"
+                  : "Boa noite";
+
+            return firstName
+              ? `${saudacao}, ${firstName}!`
+              : `${saudacao}!`;
+          })()}
         </h1>
         <p className="mt-2 max-w-[500px] text-[clamp(0.78rem,1.25vw,1.05rem)] font-medium leading-snug text-[#365563]">
           Acesse os principais sistemas e fique por dentro das informações do IDAM.
