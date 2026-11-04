@@ -257,7 +257,7 @@ function formatarData(value?: string): string {
   const date = new Date(texto);
   if (Number.isNaN(date.getTime())) return texto;
   return date.toLocaleString("pt-BR", {
-    timeZone: "America/Sao_Paulo",
+    timeZone: "America/Manaus",
     day: "2-digit",
     month: "2-digit",
     year: "numeric",
@@ -291,19 +291,21 @@ function AvisoImage({
   if (mime.startsWith("audio/") || /\.(mp3|ogg|wav)(\?|$)/i.test(mediaType) || imageUrl.startsWith("data:audio/")) return <audio className="w-full" controls preload="metadata" onError={() => setHasError(true)}><source src={imageUrl} type={imageMimeType} /></audio>;
 
   return (
-    <div className="my-3 overflow-hidden rounded-lg border border-gray-200 bg-gray-50">
-      <img
-        src={imageUrl}
-        alt={imageAlt}
-        className="h-auto max-h-80 w-full object-contain"
-        loading="lazy"
-        onError={() => setHasError(true)}
-      />
-      {caption && (
-        <div className="border-t border-gray-200 bg-gray-50/80 px-3 py-1.5 text-xs text-gray-500">
-          {caption}
-        </div>
-      )}
+    <div className="my-3 flex justify-center">
+      <figure className="flex max-w-full flex-col items-center">
+        <img
+          src={imageUrl}
+          alt={imageAlt}
+          className="block h-auto max-h-[38vh] w-auto max-w-full rounded-lg border border-gray-200 bg-gray-50 object-contain"
+          loading="lazy"
+          onError={() => setHasError(true)}
+        />
+        {caption && (
+          <figcaption className="mt-1 max-w-full rounded bg-gray-50/80 px-2 py-1 text-center text-xs text-gray-500">
+            {caption}
+          </figcaption>
+        )}
+      </figure>
     </div>
   );
 }
@@ -726,7 +728,7 @@ export function PopupAvisos() {
             </div>
 
             {/* CONTEÚDO */}
-            <div className="max-h-[70vh] overflow-y-auto p-5">
+            <div className="p-5">
               <div
                 className={`rounded border-l-4 ${config.borderColor} ${config.bgLight} p-4`}
               >
